@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JWT Decoder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-8">
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">JWT Token Decoder</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Left side - Input -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">JWT Token</h2>
+                <textarea 
+                    id="jwtInput" 
+                    class="w-full h-96 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                    placeholder="Paste your JWT token here..."
+                ></textarea>
+            </div>
+            
+            <!-- Right side - Decoded output -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Decoded Token</h2>
+                <div id="output" class="space-y-4">
+                    <div class="text-gray-500 italic">Paste a JWT token to see the decoded content</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function base64UrlDecode(str) {
+            // Replace URL-safe characters
+            str = str.replace(/-/g, '+').replace(/_/g, '/');
+            
+            // Pad with '=' to make length multiple of 4
+            while (str.length % 4) {
+                str += '=';
+            }
+            
+            try {
+                return decodeURIComponent(
+                    atob(str)
+                        .split('')
+                        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                        .join('')
+                );
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function formatJson(obj, indent = 0) {
+            let html = '';
+            const spaces = '  '.repeat(indent);
+            
+            if (typeof obj !== 'object' || obj === null) {
+                if (typeof obj === 'string') {
+                    return `<span class="text-green-600">"${obj}"</span>`;
+                } else if (typeof obj === 'number') {
+                    return `<span class="text-blue-600">${obj}</span>`;
+                } else if (typeof obj === 'boolean') {
+                    return `<span class="text-purple-600">${obj}</span>`;
+                }
+                return `<span class="text-gray-600">${obj}</span>`;
+            }
+            
+            const isArray = Array.isArray(obj);
+            const entries = Object.entries(obj);
+            
+            if (entries.length === 0) {
+                return isArray ? '[]' : '{}';
+            }
+            
+            html += isArray ? '[' : '{';
+            html += '<br>';
+            
+            entries.forEach(([key, value], index) => {
+                html += '  '.repeat(indent + 1);
+                if (!isArray) {
+                    html += `<span class="text-red-600">"${key}"</span>: `;
+                }
+                html += formatJson(value, indent + 1);
+                if (index < entries.length - 1) {
+                    html += ',';
+                }
+                html += '<br>';
+            });
+            
+            html += '  '.repeat(indent);
+            html += isArray ? ']' : '}';
+            
+            return html;
+        }
+
+        function decodeJWT(token) {
+            const parts = token.trim().split('.');
+            
+            if (parts.length !== 3) {
+                return { error: 'Invalid JWT format. Token must have 3 parts separated by dots.' };
+            }
+            
+            const [headerB64, payloadB64, signature] = parts;
+            
+            const headerJson = base64UrlDecode(headerB64);
+            const payloadJson = base64UrlDecode(payloadB64);
+            
+            if (!headerJson || !payloadJson) {
+                return { error: 'Failed to decode token. Invalid base64 encoding.' };
+            }
+            
+            try {
+                const header = JSON.parse(headerJson);
+                const payload = JSON.parse(payloadJson);
+                
+                return { header, payload, signature };
+            } catch (e) {
+                return { error: 'Failed to parse JSON: ' + e.message };
+            }
+        }
+
+        function displayDecoded(data) {
+            const output = document.getElementById('output');
+            
+            if (data.error) {
+                output.innerHTML = `<div class="text-red-600 font-semibold">${data.error}</div>`;
+                return;
+            }
+            
+            output.innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-700 mb-2">Header</h3>
+                        <div class="bg-gray-50 p-4 rounded border border-gray-200 font-mono text-sm overflow-x-auto">
+                            ${formatJson(data.header)}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-700 mb-2">Payload</h3>
+                        <div class="bg-gray-50 p-4 rounded border border-gray-200 font-mono text-sm overflow-x-auto">
+                            ${formatJson(data.payload)}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-700 mb-2">Signature</h3>
+                        <div class="bg-gray-50 p-4 rounded border border-gray-200 font-mono text-xs break-all">
+                            ${data.signature}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        document.getElementById('jwtInput').addEventListener('input', (e) => {
+            const token = e.target.value.trim();
+            
+            if (!token) {
+                document.getElementById('output').innerHTML = 
+                    '<div class="text-gray-500 italic">Paste a JWT token to see the decoded content</div>';
+                return;
+            }
+            
+            const decoded = decodeJWT(token);
+            displayDecoded(decoded);
+        });
+    </script>
+</body>
+</html>
