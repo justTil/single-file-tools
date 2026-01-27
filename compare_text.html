@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Diff Comparison</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-8">
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">Text Diff Comparison</h1>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Left text input -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Text 1</h2>
+                <textarea 
+                    id="text1Input" 
+                    class="w-full h-96 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                    placeholder="Paste first text here..."
+                ></textarea>
+            </div>
+            
+            <!-- Right text input -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Text 2</h2>
+                <textarea 
+                    id="text2Input" 
+                    class="w-full h-96 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                    placeholder="Paste second text here..."
+                ></textarea>
+            </div>
+        </div>
+
+        <!-- Comparison output -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Left comparison -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Text 1 Comparison</h2>
+                <div id="output1" class="font-mono text-sm whitespace-pre-wrap break-words">
+                    <div class="text-gray-500 italic">Paste text in both fields to see differences</div>
+                </div>
+            </div>
+            
+            <!-- Right comparison -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Text 2 Comparison</h2>
+                <div id="output2" class="font-mono text-sm whitespace-pre-wrap break-words">
+                    <div class="text-gray-500 italic">Paste text in both fields to see differences</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function compareCharacters(str1, str2) {
+            const result1 = [];
+            const result2 = [];
+            const maxLen = Math.max(str1.length, str2.length);
+            
+            for (let i = 0; i < maxLen; i++) {
+                const char1 = str1[i] || '';
+                const char2 = str2[i] || '';
+                
+                if (char1 === char2) {
+                    result1.push({ char: char1, diff: false });
+                    result2.push({ char: char2, diff: false });
+                } else {
+                    result1.push({ char: char1, diff: true });
+                    result2.push({ char: char2, diff: true });
+                }
+            }
+            
+            return { result1, result2 };
+        }
+
+        function compareTexts(text1, text2) {
+            const lines1 = text1.split('\n');
+            const lines2 = text2.split('\n');
+            const maxLines = Math.max(lines1.length, lines2.length);
+            
+            const output1 = [];
+            const output2 = [];
+            
+            for (let i = 0; i < maxLines; i++) {
+                const line1 = lines1[i] || '';
+                const line2 = lines2[i] || '';
+                
+                if (line1 === line2) {
+                    // Lines are identical
+                    output1.push({ line: line1, hasDiff: false, chars: null });
+                    output2.push({ line: line2, hasDiff: false, chars: null });
+                } else {
+                    // Lines are different - compare character by character
+                    const { result1, result2 } = compareCharacters(line1, line2);
+                    output1.push({ line: line1, hasDiff: true, chars: result1 });
+                    output2.push({ line: line2, hasDiff: true, chars: result2 });
+                }
+            }
+            
+            return { output1, output2 };
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function renderOutput(output) {
+            return output.map(lineData => {
+                if (!lineData.hasDiff) {
+                    // No difference - render normally
+                    return `<div class="leading-relaxed">${escapeHtml(lineData.line) || '&nbsp;'}</div>`;
+                } else {
+                    // Line has differences - highlight
+                    const chars = lineData.chars.map(charData => {
+                        if (!charData.diff) {
+                            return escapeHtml(charData.char);
+                        } else {
+                            // Different character - highlight with bold and bright color
+                            const escaped = escapeHtml(charData.char) || '&nbsp;';
+                            return `<span class="font-bold bg-red-200 text-red-900">${escaped}</span>`;
+                        }
+                    }).join('');
+                    
+                    return `<div class="leading-relaxed bg-yellow-50">${chars || '&nbsp;'}</div>`;
+                }
+            }).join('');
+        }
+
+        function updateComparison() {
+            const text1 = document.getElementById('text1Input').value;
+            const text2 = document.getElementById('text2Input').value;
+            
+            if (!text1 && !text2) {
+                document.getElementById('output1').innerHTML = 
+                    '<div class="text-gray-500 italic">Paste text in both fields to see differences</div>';
+                document.getElementById('output2').innerHTML = 
+                    '<div class="text-gray-500 italic">Paste text in both fields to see differences</div>';
+                return;
+            }
+            
+            const { output1, output2 } = compareTexts(text1, text2);
+            
+            document.getElementById('output1').innerHTML = renderOutput(output1);
+            document.getElementById('output2').innerHTML = renderOutput(output2);
+        }
+
+        document.getElementById('text1Input').addEventListener('input', updateComparison);
+        document.getElementById('text2Input').addEventListener('input', updateComparison);
+    </script>
+</body>
+</html>
