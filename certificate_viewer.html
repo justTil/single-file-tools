@@ -229,6 +229,11 @@
         <div class="grid">
             <div class="card">
                 <h2 class="card-title">Certificate Input</h2>
+                <div style="margin-bottom: 1rem;">
+                    <input type="file" id="fileInput" accept=".pem,.cer,.crt" style="margin-bottom: 0.5rem;">
+                    <label for="fileInput" style="display: block; font-size: 0.875rem; color: #6b7280;">Upload a .pem or
+                        .cer file, or paste below</label>
+                </div>
                 <textarea id="certInput" placeholder="Paste your certificate(s) here in PEM format (-----BEGIN CERTIFICATE-----)...
 
 You can paste:
@@ -751,6 +756,22 @@ You can paste:
             }
 
             output.innerHTML = processCertificates(input);
+        });
+
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const textarea = document.getElementById('certInput');
+                textarea.value = event.target.result;
+
+                // Trigger the input event to process the certificate
+                const inputEvent = new Event('input', { bubbles: true });
+                textarea.dispatchEvent(inputEvent);
+            };
+            reader.readAsText(file);
         });
     </script>
 </body>
