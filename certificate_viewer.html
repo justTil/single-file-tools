@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f3f4f6;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 2rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 1rem;
+        }
+
+        textarea {
+            width: 100%;
+            height: 400px;
+            padding: 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-family: "Courier New", monospace;
+            font-size: 0.875rem;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            ring: 2px;
+            ring-color: #3b82f6;
+        }
+
+        .output {
+            min-height: 400px;
+        }
+
+        .placeholder {
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        .error {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        .cert-section {
+            margin-bottom: 1.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .cert-header {
+            background-color: #f9fafb;
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cert-header:hover {
+            background-color: #f3f4f6;
+        }
+
+        .cert-header-title {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .cert-header-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .cert-body {
+            padding: 1rem;
+            display: none;
+        }
+
+        .cert-body.expanded {
+            display: block;
+        }
+
+        .field {
+            margin-bottom: 0.75rem;
+        }
+
+        .field-label {
+            font-weight: 600;
+            color: #4b5563;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .field-value {
+            color: #1f2937;
+            font-family: "Courier New", monospace;
+            font-size: 0.875rem;
+            background-color: #f9fafb;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            word-break: break-all;
+        }
+
+        .field-value.multiline {
+            white-space: pre-wrap;
+        }
+
+        .chevron {
+            display: inline-block;
+            width: 0;
+            height: 0;
+            margin-left: 0.5rem;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid #6b7280;
+            transition: transform 0.2s;
+        }
+
+        .chevron.expanded {
+            transform: rotate(180deg);
+        }
+
+        .extensions {
+            margin-top: 0.5rem;
+        }
+
+        .extension-item {
+            background-color: #f3f4f6;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .extension-name {
+            font-weight: 600;
+            color: #6366f1;
+            font-size: 0.875rem;
+        }
+
+        .extension-critical {
+            color: #dc2626;
+            font-size: 0.75rem;
+            margin-left: 0.5rem;
+        }
+
+        .extension-value {
+            margin-top: 0.25rem;
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
+
+        .info-box {
+            background-color: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0.25rem;
+        }
+
+        .info-box-title {
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-box-text {
+            color: #1e40af;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>SSL Certificate Viewer</h1>
+
+        <div class="grid">
+            <div class="card">
+                <h2 class="card-title">Certificate Input</h2>
+                <textarea id="certInput" placeholder="Paste your certificate(s) here in PEM format (-----BEGIN CERTIFICATE-----)...
+
+You can paste:
+- A single certificate
+- Multiple certificates (complete chain)
+- Root, intermediate, or end-entity certificates"></textarea>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">Decoded Certificate</h2>
+                <div id="output" class="output">
+                    <div class="placeholder">Paste a certificate to see the decoded content</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ASN.1 parsing utilities
+        function parseASN1Length(bytes, offset) {
+            const firstByte = bytes[offset];
+
+            if (firstByte < 0x80) {
+                return { length: firstByte, bytesRead: 1 };
+            }
+
+            const numOctets = firstByte & 0x7f;
+            let length = 0;
+
+            for (let i = 0; i < numOctets; i++) {
+                length = (length << 8) | bytes[offset + 1 + i];
+            }
+
+            return { length, bytesRead: 1 + numOctets };
+        }
+
+        function parseASN1(bytes, offset = 0) {
+            const tag = bytes[offset];
+            const { length, bytesRead } = parseASN1Length(bytes, offset + 1);
+            const contentOffset = offset + 1 + bytesRead;
+            const content = bytes.slice(contentOffset, contentOffset + length);
+
+            return {
+                tag,
+                length,
+                content,
+                totalLength: 1 + bytesRead + length,
+                contentOffset
+            };
+        }
+
+        function base64ToBytes(base64) {
+            const binaryString = atob(base64);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes;
+        }
+
+        function bytesToHex(bytes) {
+            return Array.from(bytes)
+                .map(b => b.toString(16).padStart(2, '0'))
+                .join(':')
+                .toUpperCase();
+        }
+
+        function parseOID(bytes) {
+            if (bytes.length === 0) return '';
+
+            const parts = [];
+            const firstByte = bytes[0];
+            parts.push(Math.floor(firstByte / 40));
+            parts.push(firstByte % 40);
+
+            let value = 0;
+            for (let i = 1; i < bytes.length; i++) {
+                value = (value << 7) | (bytes[i] & 0x7f);
+                if ((bytes[i] & 0x80) === 0) {
+                    parts.push(value);
+                    value = 0;
+                }
+            }
+
+            return parts.join('.');
+        }
+
+        const oidNames = {
+            '2.5.4.3': 'CN (Common Name)',
+            '2.5.4.6': 'C (Country)',
+            '2.5.4.7': 'L (Locality)',
+            '2.5.4.8': 'ST (State/Province)',
+            '2.5.4.10': 'O (Organization)',
+            '2.5.4.11': 'OU (Organizational Unit)',
+            '1.2.840.113549.1.9.1': 'emailAddress',
+            '2.5.29.14': 'Subject Key Identifier',
+            '2.5.29.15': 'Key Usage',
+            '2.5.29.17': 'Subject Alternative Name',
+            '2.5.29.19': 'Basic Constraints',
+            '2.5.29.31': 'CRL Distribution Points',
+            '2.5.29.32': 'Certificate Policies',
+            '2.5.29.35': 'Authority Key Identifier',
+            '2.5.29.37': 'Extended Key Usage',
+            '1.3.6.1.5.5.7.1.1': 'Authority Information Access',
+            '1.2.840.113549.1.1.1': 'RSA Encryption',
+            '1.2.840.113549.1.1.5': 'SHA1 with RSA',
+            '1.2.840.113549.1.1.11': 'SHA256 with RSA',
+            '1.2.840.113549.1.1.12': 'SHA384 with RSA',
+            '1.2.840.113549.1.1.13': 'SHA512 with RSA',
+            '1.2.840.10045.2.1': 'EC Public Key',
+            '1.2.840.10045.4.3.2': 'ECDSA with SHA256',
+            '1.2.840.10045.4.3.3': 'ECDSA with SHA384',
+            '1.2.840.10045.4.3.4': 'ECDSA with SHA512'
+        };
+
+        function parseUTCTime(bytes) {
+            const str = new TextDecoder().decode(bytes);
+            // Format: YYMMDDHHMMSSZ
+            const year = parseInt(str.substring(0, 2));
+            const fullYear = year >= 50 ? 1900 + year : 2000 + year;
+            const month = str.substring(2, 4);
+            const day = str.substring(4, 6);
+            const hour = str.substring(6, 8);
+            const minute = str.substring(8, 10);
+            const second = str.substring(10, 12);
+
+            return `${fullYear}-${month}-${day} ${hour}:${minute}:${second} UTC`;
+        }
+
+        function parseGeneralizedTime(bytes) {
+            const str = new TextDecoder().decode(bytes);
+            // Format: YYYYMMDDHHMMSSZ
+            const year = str.substring(0, 4);
+            const month = str.substring(4, 6);
+            const day = str.substring(6, 8);
+            const hour = str.substring(8, 10);
+            const minute = str.substring(10, 12);
+            const second = str.substring(12, 14);
+
+            return `${year}-${month}-${day} ${hour}:${minute}:${second} UTC`;
+        }
+
+        function parseDN(bytes, offset = 0) {
+            const parts = [];
+            let currentOffset = offset;
+
+            while (currentOffset < bytes.length) {
+                const seq = parseASN1(bytes, currentOffset);
+                if (seq.tag !== 0x30) break; // SEQUENCE
+
+                const set = parseASN1(seq.content, 0);
+                if (set.tag !== 0x31) break; // SET
+
+                const attrSeq = parseASN1(set.content, 0);
+                if (attrSeq.tag !== 0x30) break; // SEQUENCE
+
+                const oid = parseASN1(attrSeq.content, 0);
+                const value = parseASN1(attrSeq.content, oid.totalLength);
+
+                const oidStr = parseOID(oid.content);
+                const oidName = oidNames[oidStr] || oidStr;
+                const valueStr = new TextDecoder().decode(value.content);
+
+                parts.push(`${oidName}=${valueStr}`);
+
+                currentOffset += seq.totalLength;
+            }
+
+            return parts.join(', ');
+        }
+
+        function parseExtensions(bytes) {
+            const extensions = [];
+            let offset = 0;
+
+            while (offset < bytes.length) {
+                const extSeq = parseASN1(bytes, offset);
+                if (extSeq.tag !== 0x30) break;
+
+                let extOffset = 0;
+                const oid = parseASN1(extSeq.content, extOffset);
+                extOffset += oid.totalLength;
+
+                const oidStr = parseOID(oid.content);
+                const oidName = oidNames[oidStr] || oidStr;
+
+                let critical = false;
+                let valueOctetString;
+
+                // Check if next is BOOLEAN (critical flag)
+                if (extSeq.content[extOffset] === 0x01) {
+                    const criticalBool = parseASN1(extSeq.content, extOffset);
+                    critical = criticalBool.content[0] !== 0;
+                    extOffset += criticalBool.totalLength;
+                }
+
+                // Parse OCTET STRING containing the extension value
+                valueOctetString = parseASN1(extSeq.content, extOffset);
+
+                const extension = {
+                    oid: oidStr,
+                    name: oidName,
+                    critical: critical,
+                    value: parseExtensionValue(oidStr, valueOctetString.content)
+                };
+
+                extensions.push(extension);
+                offset += extSeq.totalLength;
+            }
+
+            return extensions;
+        }
+
+        function parseExtensionValue(oid, bytes) {
+            try {
+                switch (oid) {
+                    case '2.5.29.19': // Basic Constraints
+                        const bc = parseASN1(bytes, 0);
+                        if (bc.content.length === 0) return 'CA: FALSE';
+                        const isCA = parseASN1(bc.content, 0);
+                        return `CA: ${isCA.content[0] !== 0 ? 'TRUE' : 'FALSE'}`;
+
+                    case '2.5.29.15': // Key Usage
+                        const ku = parseASN1(bytes, 0);
+                        const bits = ku.content[1];
+                        const usages = [];
+                        if (bits & 0x80) usages.push('Digital Signature');
+                        if (bits & 0x40) usages.push('Non Repudiation');
+                        if (bits & 0x20) usages.push('Key Encipherment');
+                        if (bits & 0x10) usages.push('Data Encipherment');
+                        if (bits & 0x08) usages.push('Key Agreement');
+                        if (bits & 0x04) usages.push('Key Cert Sign');
+                        if (bits & 0x02) usages.push('CRL Sign');
+                        return usages.join(', ');
+
+                    case '2.5.29.17': // Subject Alternative Name
+                        const san = parseASN1(bytes, 0);
+                        const names = [];
+                        let sanOffset = 0;
+                        while (sanOffset < san.content.length) {
+                            const nameTag = san.content[sanOffset];
+                            const { length, bytesRead } = parseASN1Length(san.content, sanOffset + 1);
+                            const nameValue = san.content.slice(sanOffset + 1 + bytesRead, sanOffset + 1 + bytesRead + length);
+
+                            if (nameTag === 0x82) { // dNSName
+                                names.push('DNS: ' + new TextDecoder().decode(nameValue));
+                            } else if (nameTag === 0x87) { // iPAddress
+                                names.push('IP: ' + Array.from(nameValue).join('.'));
+                            }
+
+                            sanOffset += 1 + bytesRead + length;
+                        }
+                        return names.join(', ');
+
+                    case '2.5.29.14': // Subject Key Identifier
+                        const ski = parseASN1(bytes, 0);
+                        return bytesToHex(ski.content);
+
+                    case '2.5.29.35': // Authority Key Identifier
+                        const aki = parseASN1(bytes, 0);
+                        if (aki.content.length > 0 && aki.content[0] === 0x80) {
+                            const { length, bytesRead } = parseASN1Length(aki.content, 1);
+                            const keyId = aki.content.slice(1 + bytesRead, 1 + bytesRead + length);
+                            return bytesToHex(keyId);
+                        }
+                        return bytesToHex(aki.content);
+
+                    default:
+                        return bytesToHex(bytes);
+                }
+            } catch (e) {
+                return bytesToHex(bytes);
+            }
+        }
+
+        function parseCertificate(pemCert) {
+            try {
+                // Extract base64 content
+                const base64 = pemCert
+                    .replace(/-----BEGIN CERTIFICATE-----/, '')
+                    .replace(/-----END CERTIFICATE-----/, '')
+                    .replace(/\s/g, '');
+
+                const bytes = base64ToBytes(base64);
+
+                // Parse the certificate structure
+                const cert = parseASN1(bytes, 0); // Main SEQUENCE
+                const tbsCert = parseASN1(cert.content, 0); // TBSCertificate SEQUENCE
+
+                let offset = 0;
+
+                // Version (optional, explicit tag [0])
+                let version = 1;
+                if (tbsCert.content[offset] === 0xa0) {
+                    const versionSeq = parseASN1(tbsCert.content, offset);
+                    const versionInt = parseASN1(versionSeq.content, 0);
+                    version = versionInt.content[0] + 1;
+                    offset += versionSeq.totalLength;
+                }
+
+                // Serial Number
+                const serialNumber = parseASN1(tbsCert.content, offset);
+                offset += serialNumber.totalLength;
+
+                // Signature Algorithm
+                const signatureAlg = parseASN1(tbsCert.content, offset);
+                const sigOid = parseASN1(signatureAlg.content, 0);
+                const sigAlgOidStr = parseOID(sigOid.content);
+                offset += signatureAlg.totalLength;
+
+                // Issuer
+                const issuer = parseASN1(tbsCert.content, offset);
+                const issuerDN = parseDN(issuer.content);
+                offset += issuer.totalLength;
+
+                // Validity
+                const validity = parseASN1(tbsCert.content, offset);
+                const notBefore = parseASN1(validity.content, 0);
+                const notAfter = parseASN1(validity.content, notBefore.totalLength);
+
+                const notBeforeStr = notBefore.tag === 0x17
+                    ? parseUTCTime(notBefore.content)
+                    : parseGeneralizedTime(notBefore.content);
+                const notAfterStr = notAfter.tag === 0x17
+                    ? parseUTCTime(notAfter.content)
+                    : parseGeneralizedTime(notAfter.content);
+
+                offset += validity.totalLength;
+
+                // Subject
+                const subject = parseASN1(tbsCert.content, offset);
+                const subjectDN = parseDN(subject.content);
+                offset += subject.totalLength;
+
+                // Subject Public Key Info
+                const spki = parseASN1(tbsCert.content, offset);
+                const spkiAlg = parseASN1(spki.content, 0);
+                const spkiOid = parseASN1(spkiAlg.content, 0);
+                const pubKeyAlgOidStr = parseOID(spkiOid.content);
+
+                const pubKeyBitString = parseASN1(spki.content, spkiAlg.totalLength);
+                offset += spki.totalLength;
+
+                // Extensions (optional, explicit tag [3])
+                let extensions = [];
+                while (offset < tbsCert.content.length) {
+                    if (tbsCert.content[offset] === 0xa3) {
+                        const extWrapper = parseASN1(tbsCert.content, offset);
+                        const extSeq = parseASN1(extWrapper.content, 0);
+                        extensions = parseExtensions(extSeq.content);
+                        break;
+                    }
+                    offset++;
+                }
+
+                // Determine certificate type
+                let certType = 'End-Entity Certificate';
+                const basicConstraints = extensions.find(e => e.oid === '2.5.29.19');
+                if (basicConstraints && basicConstraints.value.includes('CA: TRUE')) {
+                    // Check if it's self-signed (root) or intermediate
+                    if (issuerDN === subjectDN) {
+                        certType = 'Root CA Certificate';
+                    } else {
+                        certType = 'Intermediate CA Certificate';
+                    }
+                }
+
+                return {
+                    version: version,
+                    serialNumber: bytesToHex(serialNumber.content),
+                    signatureAlgorithm: oidNames[sigAlgOidStr] || sigAlgOidStr,
+                    issuer: issuerDN,
+                    validity: {
+                        notBefore: notBeforeStr,
+                        notAfter: notAfterStr
+                    },
+                    subject: subjectDN,
+                    publicKeyAlgorithm: oidNames[pubKeyAlgOidStr] || pubKeyAlgOidStr,
+                    extensions: extensions,
+                    certType: certType
+                };
+            } catch (e) {
+                return { error: 'Failed to parse certificate: ' + e.message };
+            }
+        }
+
+        function displayCertificate(cert, index) {
+            if (cert.error) {
+                return `<div class="error">${cert.error}</div>`;
+            }
+
+            const certId = `cert-${index}`;
+
+            let html = `
+                <div class="cert-section">
+                    <div class="cert-header" onclick="toggleCert('${certId}')">
+                        <div>
+                            <span class="cert-header-title">Certificate ${index + 1}</span>
+                            <span class="cert-header-badge">${cert.certType}</span>
+                        </div>
+                        <span class="chevron" id="${certId}-chevron"></span>
+                    </div>
+                    <div class="cert-body" id="${certId}-body">
+                        <div class="field">
+                            <div class="field-label">Version</div>
+                            <div class="field-value">v${cert.version}</div>
+                        </div>
+                        
+                        <div class="field">
+                            <div class="field-label">Serial Number</div>
+                            <div class="field-value">${cert.serialNumber}</div>
+                        </div>
+                        
+                        <div class="field">
+                            <div class="field-label">Signature Algorithm</div>
+                            <div class="field-value">${cert.signatureAlgorithm}</div>
+                        </div>
+                        
+                        <div class="field">
+                            <div class="field-label">Issuer</div>
+                            <div class="field-value">${cert.issuer}</div>
+                        </div>
+                        
+                        <div class="field">
+                            <div class="field-label">Valid From</div>
+                            <div class="field-value">${cert.validity.notBefore}</div>
+                        </div>
+                        
+                        <div class="field">
+                            <div class="field-label">Valid To</div>
+                            <div class="field-value">${cert.validity.notAfter}</div>
+                        </div>
+                        
+                        <div class="field">
+                            <div class="field-label">Subject</div>
+                            <div class="field-value">${cert.subject}</div>
+                        </div>
+                        
+                        <div class="field">
+                            <div class="field-label">Public Key Algorithm</div>
+                            <div class="field-value">${cert.publicKeyAlgorithm}</div>
+                        </div>
+            `;
+
+            if (cert.extensions.length > 0) {
+                html += `
+                    <div class="field">
+                        <div class="field-label">Extensions</div>
+                        <div class="extensions">
+                `;
+
+                cert.extensions.forEach(ext => {
+                    html += `
+                        <div class="extension-item">
+                            <div>
+                                <span class="extension-name">${ext.name}</span>
+                                ${ext.critical ? '<span class="extension-critical">(Critical)</span>' : ''}
+                            </div>
+                            <div class="extension-value">${ext.value}</div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += `
+                    </div>
+                </div>
+            `;
+
+            return html;
+        }
+
+        function toggleCert(certId) {
+            const body = document.getElementById(`${certId}-body`);
+            const chevron = document.getElementById(`${certId}-chevron`);
+
+            body.classList.toggle('expanded');
+            chevron.classList.toggle('expanded');
+        }
+
+        function processCertificates(input) {
+            const certRegex = /-----BEGIN CERTIFICATE-----[\s\S]+?-----END CERTIFICATE-----/g;
+            const matches = input.match(certRegex);
+
+            if (!matches || matches.length === 0) {
+                return '<div class="error">No valid PEM certificates found. Please paste certificate(s) in PEM format.</div>';
+            }
+
+            let html = '';
+
+            if (matches.length > 1) {
+                html += `
+                    <div class="info-box">
+                        <div class="info-box-title">Certificate Chain Detected</div>
+                        <div class="info-box-text">Found ${matches.length} certificates in the chain. Typically ordered from end-entity → intermediate(s) → root.</div>
+                    </div>
+                `;
+            }
+
+            matches.forEach((pemCert, index) => {
+                const cert = parseCertificate(pemCert);
+                html += displayCertificate(cert, index);
+            });
+
+            return html;
+        }
+
+        document.getElementById('certInput').addEventListener('input', (e) => {
+            const input = e.target.value.trim();
+            const output = document.getElementById('output');
+
+            if (!input) {
+                output.innerHTML = '<div class="placeholder">Paste a certificate to see the decoded content</div>';
+                return;
+            }
+
+            output.innerHTML = processCertificates(input);
+        });
+    </script>
+</body>
+
+</html>
