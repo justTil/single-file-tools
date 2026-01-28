@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Diff Comparison</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f3f4f6;
+            min-height: 100vh;
+            padding: 2rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 2rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (min-width: 1024px) {
+            .grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .panel {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 1rem;
+        }
+
+        textarea {
+            width: 100%;
+            height: 384px;
+            padding: 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.875rem;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+
+        textarea::placeholder {
+            color: #9ca3af;
+        }
+
+        .output {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.875rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .placeholder {
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        .line-normal {
+            line-height: 1.625;
+        }
+
+        .line-diff {
+            line-height: 1.625;
+            background-color: #fefce8;
+        }
+
+        .char-diff {
+            font-weight: bold;
+            background-color: #fecaca;
+            color: #7f1d1d;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Text Diff Comparison</h1>
+
+        <div class="grid">
+            <!-- Left text input -->
+            <div class="panel">
+                <h2>Text 1</h2>
+                <textarea id="text1Input" placeholder="Paste first text here..."></textarea>
+            </div>
+
+            <!-- Right text input -->
+            <div class="panel">
+                <h2>Text 2</h2>
+                <textarea id="text2Input" placeholder="Paste second text here..."></textarea>
+            </div>
+        </div>
+
+        <!-- Comparison output -->
+        <div class="grid">
+            <!-- Left comparison -->
+            <div class="panel">
+                <h2>Text 1 Comparison</h2>
+                <div id="output1" class="output">
+                    <div class="placeholder">Paste text in both fields to see differences</div>
+                </div>
+            </div>
+
+            <!-- Right comparison -->
+            <div class="panel">
+                <h2>Text 2 Comparison</h2>
+                <div id="output2" class="output">
+                    <div class="placeholder">Paste text in both fields to see differences</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function compareCharacters(str1, str2) {
+            const result1 = [];
+            const result2 = [];
+            const maxLen = Math.max(str1.length, str2.length);
+
+            for (let i = 0; i < maxLen; i++) {
+                const char1 = str1[i] || '';
+                const char2 = str2[i] || '';
+
+                if (char1 === char2) {
+                    result1.push({ char: char1, diff: false });
+                    result2.push({ char: char2, diff: false });
+                } else {
+                    result1.push({ char: char1, diff: true });
+                    result2.push({ char: char2, diff: true });
+                }
+            }
+
+            return { result1, result2 };
+        }
+
+        function compareTexts(text1, text2) {
+            const lines1 = text1.split('\n');
+            const lines2 = text2.split('\n');
+            const maxLines = Math.max(lines1.length, lines2.length);
+
+            const output1 = [];
+            const output2 = [];
+
+            for (let i = 0; i < maxLines; i++) {
+                const line1 = lines1[i] || '';
+                const line2 = lines2[i] || '';
+
+                if (line1 === line2) {
+                    // Lines are identical
+                    output1.push({ line: line1, hasDiff: false, chars: null });
+                    output2.push({ line: line2, hasDiff: false, chars: null });
+                } else {
+                    // Lines are different - compare character by character
+                    const { result1, result2 } = compareCharacters(line1, line2);
+                    output1.push({ line: line1, hasDiff: true, chars: result1 });
+                    output2.push({ line: line2, hasDiff: true, chars: result2 });
+                }
+            }
+
+            return { output1, output2 };
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function renderOutput(output) {
+            return output.map(lineData => {
+                if (!lineData.hasDiff) {
+                    // No difference - render normally
+                    return `<div class="line-normal">${escapeHtml(lineData.line) || '&nbsp;'}</div>`;
+                } else {
+                    // Line has differences - highlight
+                    const chars = lineData.chars.map(charData => {
+                        if (!charData.diff) {
+                            return escapeHtml(charData.char);
+                        } else {
+                            // Different character - highlight with bold and bright color
+                            const escaped = escapeHtml(charData.char) || '&nbsp;';
+                            return `<span class="char-diff">${escaped}</span>`;
+                        }
+                    }).join('');
+
+                    return `<div class="line-diff">${chars || '&nbsp;'}</div>`;
+                }
+            }).join('');
+        }
+
+        function updateComparison() {
+            const text1 = document.getElementById('text1Input').value;
+            const text2 = document.getElementById('text2Input').value;
+
+            if (!text1 && !text2) {
+                document.getElementById('output1').innerHTML =
+                    '<div class="placeholder">Paste text in both fields to see differences</div>';
+                document.getElementById('output2').innerHTML =
+                    '<div class="placeholder">Paste text in both fields to see differences</div>';
+                return;
+            }
+
+            const { output1, output2 } = compareTexts(text1, text2);
+
+            document.getElementById('output1').innerHTML = renderOutput(output1);
+            document.getElementById('output2').innerHTML = renderOutput(output2);
+        }
+
+        document.getElementById('text1Input').addEventListener('input', updateComparison);
+        document.getElementById('text2Input').addEventListener('input', updateComparison);
+    </script>
+</body>
+
+</html>
