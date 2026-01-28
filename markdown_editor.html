@@ -253,6 +253,20 @@
         .btn:active {
             background-color: #d1d5db;
         }
+
+        .btn-blue {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .btn-blue:hover {
+            background-color: #2563eb;
+        }
+
+        .btn-blue:active {
+            background-color: #1d4ed8;
+        }
     </style>
 </head>
 
@@ -272,8 +286,17 @@
                     <button class="btn" onclick="insertMarkdown('*', '*')">Italic</button>
                     <button class="btn" onclick="insertMarkdown('`', '`')">Code</button>
                     <button class="btn" onclick="insertMarkdown('[', '](url)')">Link</button>
+                    <button class="btn" onclick="insertMarkdown('> ', '')">Quote</button>
+                    <button class="btn" onclick="insertTable()">Table</button>
+                    <button class="btn" onclick="insertMarkdown('~~', '~~')">Strikethrough</button>
+                    <button class="btn" onclick="insertMarkdown('- [ ] ', '')">Task List</button>
                     <button class="btn" onclick="insertMarkdown('- ', '')">List</button>
                     <button class="btn" onclick="insertMarkdown('```\n', '\n```')">Code Block</button>
+                    <button class="btn" onclick="insertMarkdown('---\n', '')">Divider</button>
+                    <button class="btn" onclick="insertAuthor()">Author</button>
+                    <button class="btn btn-blue" onclick="clearEditor()">Clear</button>
+                    <button class="btn btn-blue" onclick="copyMarkdown()">Copy</button>
+                    <button class="btn btn-blue" onclick="downloadMarkdown()">Download</button>
                 </div>
                 <textarea id="markdownInput" placeholder="# README
 
@@ -449,6 +472,68 @@ const app = require('app');
             textarea.focus();
 
             updatePreview();
+        }
+
+        function insertTable() {
+            const tableTemplate = '| Header 1 | Header 2 | Header 3 |\n| -------- | -------- | -------- |\n| Cell 1   | Cell 2   | Cell 3   |\n| Cell 4   | Cell 5   | Cell 6   |\n';
+            const textarea = document.getElementById('markdownInput');
+            const start = textarea.selectionStart;
+            const beforeText = textarea.value.substring(0, start);
+            const afterText = textarea.value.substring(start);
+
+            textarea.value = beforeText + tableTemplate + afterText;
+            textarea.setSelectionRange(start, start + tableTemplate.length);
+            textarea.focus();
+
+            updatePreview();
+        }
+
+        function insertAuthor() {
+            const authorTemplate = '## Author\n\n**Your Name** - [@username](https://github.com/username)\n';
+            const textarea = document.getElementById('markdownInput');
+            const start = textarea.selectionStart;
+            const beforeText = textarea.value.substring(0, start);
+            const afterText = textarea.value.substring(start);
+
+            textarea.value = beforeText + authorTemplate + afterText;
+            textarea.setSelectionRange(start, start + authorTemplate.length);
+            textarea.focus();
+
+            updatePreview();
+        }
+
+        function clearEditor() {
+            if (confirm('Are you sure you want to clear the editor?')) {
+                document.getElementById('markdownInput').value = '';
+                updatePreview();
+            }
+        }
+
+        function copyMarkdown() {
+            const textarea = document.getElementById('markdownInput');
+            textarea.select();
+            document.execCommand('copy');
+
+            // Visual feedback
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = 'Copied!';
+            setTimeout(() => {
+                btn.textContent = originalText;
+            }, 1500);
+        }
+
+        function downloadMarkdown() {
+            const content = document.getElementById('markdownInput').value;
+            const blob = new Blob([content], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'README.md';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
         document.getElementById('markdownInput').addEventListener('input', updatePreview);
