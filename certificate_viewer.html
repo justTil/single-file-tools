@@ -48,6 +48,8 @@
             border-radius: 0.5rem;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
             padding: 1.5rem;
+            min-width: 0;
+            overflow: hidden;
         }
 
         .card-title {
@@ -77,6 +79,8 @@
 
         .output {
             min-height: 400px;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
         .placeholder {
@@ -94,6 +98,7 @@
             border: 1px solid #e5e7eb;
             border-radius: 0.5rem;
             overflow: hidden;
+            min-width: 0;
         }
 
         .cert-header {
@@ -126,6 +131,8 @@
         .cert-body {
             padding: 1rem;
             display: none;
+            min-width: 0;
+            overflow: hidden;
         }
 
         .cert-body.expanded {
@@ -150,7 +157,10 @@
             background-color: #f9fafb;
             padding: 0.5rem;
             border-radius: 0.25rem;
-            word-break: break-all;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
+            overflow: hidden;
         }
 
         .field-value.multiline {
@@ -199,6 +209,8 @@
             margin-top: 0.25rem;
             font-size: 0.875rem;
             color: #4b5563;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
 
         .info-box {
