@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <style type="text/css">
+        :root {
+            --color-primary: #E30613;
+            --color-dark-blue: #0d1b2a;
+            --color-white: #ffffff;
+            --color-light-gray: #f7f7f7;
+            --color-border: #e0e0e0;
+            --color-text-dark: #0d1b2a;
+            --color-text-medium: #666666;
+            --color-text-light: #999999;
+        }
+    </style>
+    <!--[if mso]>
+  <style type="text/css">
+    body, table, td {font-family: Arial, Helvetica, sans-serif !important;}
+  </style>
+  <![endif]-->
+</head>
+
+<body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: Arial, Helvetica, sans-serif;">
+
+    <!-- Main Container -->
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f5f5f5; padding: 20px 0;">
+        <tr>
+            <td align="center">
+
+                <!-- Content Table -->
+                <table width="600" cellpadding="0" cellspacing="0" border="0"
+                    style="background-color: #ffffff; max-width: 600px;">
+
+                    <!-- Hero Header -->
+                    <tr>
+                        <td style="background-color: #0d1b2a; padding: 30px 30px;">
+                            <!-- Red Top Border -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td
+                                        style="background-color: #E30613; height: 4px; line-height: 4px; font-size: 4px;">
+                                        &nbsp;</td>
+                                </tr>
+                            </table>
+
+                            <!-- Event Type Badge -->
+                            <table cellpadding="0" cellspacing="0" border="0" style="margin: 15px 0 15px 0;">
+                                <tr>
+                                    <td
+                                        style="background-color: #E30613; padding: 6px 12px; font-size: 11px; font-weight: bold; color: #ffffff; text-transform: uppercase; letter-spacing: 1px;">
+                                        {{EventType}}
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Title -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td
+                                        style="font-size: 26px; font-weight: bold; color: #ffffff; padding-bottom: 10px; line-height: 32px;">
+                                        {{EventTitle}}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size: 14px; color: #cccccc; line-height: 20px;">
+                                        {{EventSubtitle}}
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Event Details Section -->
+                    <tr>
+                        <td style="background-color: #f7f7f7; padding: 30px 30px; border-top: 4px solid #E30613;">
+
+                            <!-- Details Grid -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <!-- Date & Time -->
+                                    <td width="48%" valign="top"
+                                        style="background-color: #ffffff; padding: 20px; border: 1px solid #e0e0e0;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td
+                                                    style="font-size: 10px; font-weight: bold; color: #666666; text-transform: uppercase; letter-spacing: 1px; padding-bottom: 8px;">
+                                                    DATUM & ZEIT
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td
+                                                    style="font-size: 15px; font-weight: bold; color: #1a1a1a; padding-bottom: 4px;">
+                                                    {{EventDate}}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-size: 13px; color: #666666;">
+                                                    {{EventTime}}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+
+                                    <td width="4%">&nbsp;</td>
+
+                                    <!-- Location -->
+                                    <td width="48%" valign="top"
+                                        style="background-color: #ffffff; padding: 20px; border: 1px solid #e0e0e0;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td
+                                                    style="font-size: 10px; font-weight: bold; color: #666666; text-transform: uppercase; letter-spacing: 1px; padding-bottom: 8px;">
+                                                    ORT
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td
+                                                    style="font-size: 15px; font-weight: bold; color: #1a1a1a; padding-bottom: 4px;">
+                                                    {{Location}}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-size: 13px; color: #666666;">
+                                                    {{LocationDetails}}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+
+                                <!-- Spacer -->
+                                <tr>
+                                    <td colspan="3" style="height: 15px; line-height: 15px;">&nbsp;</td>
+                                </tr>
+
+                                <tr>
+                                    <!-- Duration -->
+                                    <td width="48%" valign="top"
+                                        style="background-color: #ffffff; padding: 20px; border: 1px solid #e0e0e0;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td
+                                                    style="font-size: 10px; font-weight: bold; color: #666666; text-transform: uppercase; letter-spacing: 1px; padding-bottom: 8px;">
+                                                    DAUER
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td
+                                                    style="font-size: 15px; font-weight: bold; color: #1a1a1a; padding-bottom: 4px;">
+                                                    {{Duration}}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-size: 13px; color: #666666;">
+                                                    {{DurationDetails}}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+
+                                    <td width="4%">&nbsp;</td>
+
+                                    <!-- Host -->
+                                    <td width="48%" valign="top"
+                                        style="background-color: #ffffff; padding: 20px; border: 1px solid #e0e0e0;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td
+                                                    style="font-size: 10px; font-weight: bold; color: #666666; text-transform: uppercase; letter-spacing: 1px; padding-bottom: 8px;">
+                                                    MODERATOR
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td
+                                                    style="font-size: 15px; font-weight: bold; color: #1a1a1a; padding-bottom: 4px;">
+                                                    {{HostName}}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-size: 13px; color: #666666;">
+                                                    {{HostTitle}}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </td>
+                    </tr>
+
+                    <!-- Description Section -->
+                    <tr>
+                        <td style="background-color: #ffffff; padding: 30px 30px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td
+                                        style="font-size: 18px; font-weight: bold; color: #1a1a1a; padding-bottom: 15px; border-bottom: 2px solid #E30613;">
+                                        Veranstaltungsdetails
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size: 14px; color: #333333; line-height: 22px; padding-top: 15px;">
+                                        {{EventDescription}}
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Agenda Section -->
+                    <tr>
+                        <td style="background-color: #f7f7f7; padding: 30px 30px; border-top: 1px solid #e0e0e0;">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td
+                                        style="font-size: 18px; font-weight: bold; color: #1a1a1a; padding-bottom: 15px; border-bottom: 2px solid #E30613;">
+                                        Agenda
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Agenda Items -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top: 15px;">
+                                <!-- Item 1 -->
+                                <tr>
+                                    <td
+                                        style="background-color: #ffffff; padding: 15px; border-left: 4px solid #E30613;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td width="30" valign="top"
+                                                    style="background-color: #0d1b2a; color: #ffffff; font-size: 13px; font-weight: bold; text-align: center; padding: 4px 0; width: 30px;">
+                                                    1
+                                                </td>
+                                                <td width="15">&nbsp;</td>
+                                                <td style="font-size: 14px; color: #333333; line-height: 20px;">
+                                                    {{AgendaItem1}}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+
+                                <!-- Spacer -->
+                                <tr>
+                                    <td style="height: 10px; line-height: 10px;">&nbsp;</td>
+                                </tr>
+
+                                <!-- Item 2 -->
+                                <tr>
+                                    <td
+                                        style="background-color: #ffffff; padding: 15px; border-left: 4px solid #999999;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td width="30" valign="top"
+                                                    style="background-color: #0d1b2a; color: #ffffff; font-size: 13px; font-weight: bold; text-align: center; padding: 4px 0; width: 30px;">
+                                                    2
+                                                </td>
+                                                <td width="15">&nbsp;</td>
+                                                <td style="font-size: 14px; color: #333333; line-height: 20px;">
+                                                    {{AgendaItem2}}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+
+                                <!-- Spacer -->
+                                <tr>
+                                    <td style="height: 10px; line-height: 10px;">&nbsp;</td>
+                                </tr>
+
+                                <!-- Item 3 -->
+                                <tr>
+                                    <td
+                                        style="background-color: #ffffff; padding: 15px; border-left: 4px solid #999999;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td width="30" valign="top"
+                                                    style="background-color: #0d1b2a; color: #ffffff; font-size: 13px; font-weight: bold; text-align: center; padding: 4px 0; width: 30px;">
+                                                    3
+                                                </td>
+                                                <td width="15">&nbsp;</td>
+                                                <td style="font-size: 14px; color: #333333; line-height: 20px;">
+                                                    {{AgendaItem3}}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+
+                                <!-- Spacer -->
+                                <tr>
+                                    <td style="height: 10px; line-height: 10px;">&nbsp;</td>
+                                </tr>
+
+                                <!-- Item 4 -->
+                                <tr>
+                                    <td
+                                        style="background-color: #ffffff; padding: 15px; border-left: 4px solid #999999;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td width="30" valign="top"
+                                                    style="background-color: #0d1b2a; color: #ffffff; font-size: 13px; font-weight: bold; text-align: center; padding: 4px 0; width: 30px;">
+                                                    4
+                                                </td>
+                                                <td width="15">&nbsp;</td>
+                                                <td style="font-size: 14px; color: #333333; line-height: 20px;">
+                                                    {{AgendaItem4}}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </td>
+                    </tr>
+
+                    <!-- Additional Info Section -->
+                    <tr>
+                        <td style="background-color: #f7f7f7; padding: 25px 30px; border-top: 1px solid #e0e0e0;">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td
+                                        style="font-size: 15px; font-weight: bold; color: #0d1b2a; padding-bottom: 10px;">
+                                        Fragen oder Anmerkungen?
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td
+                                        style="font-size: 13px; color: #333333; line-height: 20px; padding-bottom: 12px;">
+                                        {{AdditionalInfo}}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size: 13px; color: #666666;">
+                                        Kontakt: <a href="mailto:{{ContactEmail}}"
+                                            style="color: #E30613; font-weight: bold; text-decoration: none;">{{ContactEmail}}</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #ffffff; padding: 25px 30px; border-top: 4px solid #E30613;">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td align="center"
+                                        style="font-size: 15px; font-weight: bold; color: #0d1b2a; padding-bottom: 5px;">
+                                        {{TeamName}}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center"
+                                        style="font-size: 13px; font-weight: bold; color: #333333; padding-bottom: 3px;">
+                                        {{CompanyName}}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="font-size: 13px; color: #666666; padding-bottom: 15px;">
+                                        {{Address}}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="border-top: 1px solid #e0e0e0; padding-top: 15px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td align="center"
+                                                    style="font-size: 11px; color: #999999; line-height: 16px;">
+                                                    Diese Einladung wurde automatisch generiert.<br>
+                                                    © {{Year}} {{CompanyName}}. Alle Rechte vorbehalten.
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                </table>
+                <!-- End Content Table -->
+
+            </td>
+        </tr>
+    </table>
+    <!-- End Main Container -->
+
+</body>
+
+</html>
