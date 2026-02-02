@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Character & Word Counter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f3f4f6;
+            min-height: 100vh;
+            padding: 2rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 2rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .panel {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 1rem;
+        }
+
+        h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        textarea {
+            width: 100%;
+            height: 384px;
+            padding: 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-size: 0.875rem;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+
+        textarea::placeholder {
+            color: #9ca3af;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background-color: #f9fafb;
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .details-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .detail-value {
+            color: #1f2937;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .placeholder {
+            color: #6b7280;
+            font-style: italic;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .info-box {
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .info-title {
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .info-list {
+            font-size: 0.75rem;
+            color: #1e40af;
+            line-height: 1.6;
+            padding-left: 1.25rem;
+        }
+
+        .info-list li {
+            margin-bottom: 0.25rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Character & Word Counter</h1>
+
+        <div class="grid">
+            <!-- Left side - Input -->
+            <div class="panel">
+                <h2>Text Input</h2>
+                <textarea id="textInput" placeholder="Start typing or paste your text here..."></textarea>
+            </div>
+
+            <!-- Right side - Statistics -->
+            <div class="panel">
+                <h2>Statistics</h2>
+                <div id="output">
+                    <div class="placeholder">Type or paste text to see statistics</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function countStatistics(text) {
+            // Character counts
+            const totalChars = text.length;
+            const charsNoSpaces = text.replace(/\s/g, '').length;
+            const charsWithSpaces = totalChars;
+
+            // Word count (split by whitespace and filter empty strings)
+            const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+            const wordCount = text.trim() === '' ? 0 : words.length;
+
+            // Line count (split by newlines and count non-empty lines)
+            const lines = text.split('\n');
+            const lineCount = lines.length;
+            const nonEmptyLines = lines.filter(line => line.trim().length > 0).length;
+
+            // Sentence count (basic - splits on .!?)
+            const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+            const sentenceCount = sentences.length;
+
+            // Paragraph count (split by double newlines or multiple newlines)
+            const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+            const paragraphCount = paragraphs.length;
+
+            // Average word length
+            const avgWordLength = wordCount > 0
+                ? (charsNoSpaces / wordCount).toFixed(1)
+                : 0;
+
+            // Average words per sentence
+            const avgWordsPerSentence = sentenceCount > 0
+                ? (wordCount / sentenceCount).toFixed(1)
+                : 0;
+
+            // Reading time (assuming 200 words per minute)
+            const readingTimeMinutes = (wordCount / 200).toFixed(1);
+
+            // Speaking time (assuming 150 words per minute)
+            const speakingTimeMinutes = (wordCount / 150).toFixed(1);
+
+            return {
+                totalChars,
+                charsNoSpaces,
+                charsWithSpaces,
+                wordCount,
+                lineCount,
+                nonEmptyLines,
+                sentenceCount,
+                paragraphCount,
+                avgWordLength,
+                avgWordsPerSentence,
+                readingTimeMinutes,
+                speakingTimeMinutes
+            };
+        }
+
+        function displayStatistics(stats) {
+            const output = document.getElementById('output');
+
+            output.innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.wordCount.toLocaleString()}</div>
+                        <div class="stat-label">Words</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.totalChars.toLocaleString()}</div>
+                        <div class="stat-label">Characters</div>
+                    </div>
+                </div>
+
+                <div class="details-section">
+                    <h3>Detailed Counts</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Characters (with spaces)</span>
+                        <span class="detail-value">${stats.charsWithSpaces.toLocaleString()}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Characters (without spaces)</span>
+                        <span class="detail-value">${stats.charsNoSpaces.toLocaleString()}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Words</span>
+                        <span class="detail-value">${stats.wordCount.toLocaleString()}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Sentences</span>
+                        <span class="detail-value">${stats.sentenceCount.toLocaleString()}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Paragraphs</span>
+                        <span class="detail-value">${stats.paragraphCount.toLocaleString()}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Lines</span>
+                        <span class="detail-value">${stats.lineCount.toLocaleString()}</span>
+                    </div>
+                </div>
+
+                <div class="details-section">
+                    <h3>Averages</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Average word length</span>
+                        <span class="detail-value">${stats.avgWordLength} characters</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Average words per sentence</span>
+                        <span class="detail-value">${stats.avgWordsPerSentence} words</span>
+                    </div>
+                </div>
+
+                <div class="details-section">
+                    <h3>Reading Time</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Reading time (200 wpm)</span>
+                        <span class="detail-value">${stats.readingTimeMinutes} min</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Speaking time (150 wpm)</span>
+                        <span class="detail-value">${stats.speakingTimeMinutes} min</span>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-title">What's counted:</div>
+                    <ul class="info-list">
+                        <li>Words: Text separated by spaces</li>
+                        <li>Sentences: Text ending with . ! or ?</li>
+                        <li>Paragraphs: Text blocks separated by blank lines</li>
+                        <li>Reading time: Based on 200 words per minute</li>
+                    </ul>
+                </div>
+            `;
+        }
+
+        document.getElementById('textInput').addEventListener('input', (e) => {
+            const text = e.target.value;
+
+            if (!text) {
+                document.getElementById('output').innerHTML =
+                    '<div class="placeholder">Type or paste text to see statistics</div>';
+                return;
+            }
+
+            const stats = countStatistics(text);
+            displayStatistics(stats);
+        });
+    </script>
+</body>
+
+</html>

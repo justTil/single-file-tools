@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Links</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f3f4f6;
+            min-height: 100vh;
+            padding: 2rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        .search-box {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+
+        .category-section {
+            margin-bottom: 2rem;
+        }
+
+        .category-header {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .link-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            padding: 1.25rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+        }
+
+        .link-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .link-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .link-url {
+            font-size: 0.75rem;
+            color: #3b82f6;
+            word-break: break-all;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .link-description {
+            font-size: 0.875rem;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+
+        .external-icon {
+            display: inline-block;
+            margin-left: 0.25rem;
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Team Resource Links</h1>
+        <p class="subtitle">Quick access to frequently used tools and resources</p>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search links..." oninput="filterLinks()">
+        </div>
+
+        <div id="linksContainer">
+            <!-- Development Tools -->
+            <div class="category-section" data-category="development">
+                <h2 class="category-header">Development Tools</h2>
+                <div class="grid">
+                    <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="link-card"
+                        data-search="github git repository code version control">
+                        <div class="link-title">GitHub <span class="external-icon">↗</span></div>
+                        <div class="link-url">https://github.com</div>
+                        <div class="link-description">Git repository hosting and version control</div>
+                    </a>
+
+                    <a href="https://gitlab.com" target="_blank" rel="noopener noreferrer" class="link-card"
+                        data-search="gitlab git repository code ci cd pipeline">
+                        <div class="link-title">GitLab <span class="external-icon">↗</span></div>
+                        <div class="link-url">https://gitlab.com</div>
+                        <div class="link-description">Git repository with built-in CI/CD pipelines</div>
+                    </a>
+
+                    <a href="https://stackoverflow.com" target="_blank" rel="noopener noreferrer" class="link-card"
+                        data-search="stackoverflow stack overflow questions answers programming help">
+                        <div class="link-title">Stack Overflow <span class="external-icon">↗</span></div>
+                        <div class="link-url">https://stackoverflow.com</div>
+                        <div class="link-description">Programming Q&A community</div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Documentation -->
+            <div class="category-section" data-category="documentation">
+                <h2 class="category-header">Documentation</h2>
+                <div class="grid">
+                    <a href="https://developer.mozilla.org" target="_blank" rel="noopener noreferrer" class="link-card"
+                        data-search="mdn mozilla web html css javascript documentation">
+                        <div class="link-title">MDN Web Docs <span class="external-icon">↗</span></div>
+                        <div class="link-url">https://developer.mozilla.org</div>
+                        <div class="link-description">Web technology documentation and tutorials</div>
+                    </a>
+
+                    <a href="https://docs.python.org" target="_blank" rel="noopener noreferrer" class="link-card"
+                        data-search="python documentation docs reference">
+                        <div class="link-title">Python Documentation <span class="external-icon">↗</span></div>
+                        <div class="link-url">https://docs.python.org</div>
+                        <div class="link-description">Official Python language documentation</div>
+                    </a>
+
+                    <a href="https://devdocs.io" target="_blank" rel="noopener noreferrer" class="link-card"
+                        data-search="devdocs documentation api reference multiple languages">
+                        <div class="link-title">DevDocs <span class="external-icon">↗</span></div>
+                        <div class="link-url">https://devdocs.io</div>
+                        <div class="link-description">API documentation browser for multiple languages</div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Collaboration -->
+            <div class="category-section" data-category="collaboration">
+                <h2 class="category-header">Collaboration</h2>
+                <div class="grid">
+                    <a href="https://slack.com" target="_blank" rel="noopener noreferrer" class="link-card"
+                        data-search="slack chat communication team messaging">
+                        <div class="link-title">Slack <span class="external-icon">↗</span></div>
+                        <div class="link-url">https://slack.com</div>
+                        <div class="link-description">Team communication and messaging</div>
+                    </a>
+
+                    <a href="https://www.atlassian.com/software/jira" target="_blank" rel="noopener noreferrer"
+                        class="link-card" data-search="jira atlassian project management tickets issues agile">
+                        <div class="link-title">Jira <span class="external-icon">↗</span></div>
+                        <div class="link-url">https://www.atlassian.com/software/jira</div>
+                        <div class="link-description">Project management and issue tracking</div>
+                    </a>
+
+                    <a href="https://www.atlassian.com/software/confluence" target="_blank" rel="noopener noreferrer"
+                        class="link-card" data-search="confluence atlassian wiki documentation knowledge base">
+                        <div class="link-title">Confluence <span class="external-icon">↗</span></div>
+                        <div class="link-url">https://www.atlassian.com/software/confluence</div>
+                        <div class="link-description">Team wiki and documentation</div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Utilities -->
+            <div class="category-section" data-category="utilities">
+                <h2 class="category-header">Utilities</h2>
+                <div class="grid">
+                    <a href="https://regex101.com" target="_blank" rel="noopener noreferrer" class="link-card"
+                        data-search="regex regular expression tester pattern matching">
+                        <div class="link-title">Regex101 <span class="external-icon">↗</span></div>
+                        <div class="link-url">https://regex101.com</div>
+                        <div class="link-description">Regular expression tester and debugger</div>
+                    </a>
+
+                    <a href="https://www.json.org" target="_blank" rel="noopener noreferrer" class="link-card"
+                        data-search="json formatter validator data format">
+                        <div class="link-title">JSON.org <span class="external-icon">↗</span></div>
+                        <div class="link-url">https://www.json.org</div>
+                        <div class="link-description">JSON format specification and tools</div>
+                    </a>
+
+                    <a href="https://crontab.guru" target="_blank" rel="noopener noreferrer" class="link-card"
+                        data-search="cron crontab schedule scheduler timing">
+                        <div class="link-title">Crontab Guru <span class="external-icon">↗</span></div>
+                        <div class="link-url">https://crontab.guru</div>
+                        <div class="link-description">Cron schedule expression editor</div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Monitoring & Operations -->
+            <div class="category-section" data-category="monitoring">
+                <h2 class="category-header">Monitoring & Operations</h2>
+                <div class="grid">
+                    <a href="https://www.datadoghq.com" target="_blank" rel="noopener noreferrer" class="link-card"
+                        data-search="datadog monitoring metrics logs apm">
+                        <div class="link-title">Datadog <span class="external-icon">↗</span></div>
+                        <div class="link-url">https://www.datadoghq.com</div>
+                        <div class="link-description">Infrastructure monitoring and analytics</div>
+                    </a>
+
+                    <a href="https://grafana.com" target="_blank" rel="noopener noreferrer" class="link-card"
+                        data-search="grafana dashboard visualization metrics monitoring">
+                        <div class="link-title">Grafana <span class="external-icon">↗</span></div>
+                        <div class="link-url">https://grafana.com</div>
+                        <div class="link-description">Metrics dashboards and visualization</div>
+                    </a>
+
+                    <a href="https://www.pagerduty.com" target="_blank" rel="noopener noreferrer" class="link-card"
+                        data-search="pagerduty incident alerts on-call notification">
+                        <div class="link-title">PagerDuty <span class="external-icon">↗</span></div>
+                        <div class="link-url">https://www.pagerduty.com</div>
+                        <div class="link-description">Incident management and alerting</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function filterLinks() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const categories = document.querySelectorAll('.category-section');
+            let visibleCount = 0;
+
+            categories.forEach(category => {
+                const cards = category.querySelectorAll('.link-card');
+                let categoryHasVisible = false;
+
+                cards.forEach(card => {
+                    const searchData = card.getAttribute('data-search').toLowerCase();
+                    const title = card.querySelector('.link-title').textContent.toLowerCase();
+                    const description = card.querySelector('.link-description').textContent.toLowerCase();
+
+                    const isVisible = searchTerm === '' ||
+                        title.includes(searchTerm) ||
+                        description.includes(searchTerm) ||
+                        searchData.includes(searchTerm);
+
+                    card.style.display = isVisible ? 'block' : 'none';
+
+                    if (isVisible) {
+                        categoryHasVisible = true;
+                        visibleCount++;
+                    }
+                });
+
+                category.style.display = categoryHasVisible ? 'block' : 'none';
+            });
+
+            // Show/hide no results message
+            let noResultsMsg = document.getElementById('noResults');
+            if (visibleCount === 0 && searchTerm !== '') {
+                if (!noResultsMsg) {
+                    noResultsMsg = document.createElement('div');
+                    noResultsMsg.id = 'noResults';
+                    noResultsMsg.className = 'no-results';
+                    noResultsMsg.textContent = 'No links found matching your search';
+                    document.getElementById('linksContainer').appendChild(noResultsMsg);
+                }
+                noResultsMsg.style.display = 'block';
+            } else if (noResultsMsg) {
+                noResultsMsg.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+
+</html>
