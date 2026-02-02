@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Formatter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f3f4f6;
+            min-height: 100vh;
+            padding: 2rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 2rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #2563eb;
+        }
+
+        .btn:active {
+            background-color: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background-color: #6b7280;
+        }
+
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+
+        .btn-secondary:active {
+            background-color: #374151;
+        }
+
+        .select-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .select-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        select {
+            padding: 0.5rem 0.75rem;
+            background-color: white;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            color: #374151;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        select:hover {
+            border-color: #9ca3af;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .panel {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 1rem;
+        }
+
+        .editor-container {
+            position: relative;
+            display: flex;
+            height: 384px;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .editor-container:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+
+        .line-numbers {
+            background-color: #f3f4f6;
+            color: #6b7280;
+            padding: 1rem 0.75rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            text-align: right;
+            user-select: none;
+            border-right: 1px solid #d1d5db;
+            overflow: hidden;
+            min-width: 3rem;
+            white-space: pre;
+        }
+
+        textarea {
+            flex: 1;
+            height: 100%;
+            padding: 1rem;
+            border: none;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.875rem;
+            resize: none;
+            outline: none;
+            line-height: 1.5;
+        }
+
+        textarea::placeholder {
+            color: #9ca3af;
+        }
+
+        .output {
+            height: 384px;
+            overflow-y: auto;
+        }
+
+        .output-container {
+            position: relative;
+            display: flex;
+            height: 384px;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            overflow: hidden;
+            background-color: #f9fafb;
+        }
+
+        .output-line-numbers {
+            background-color: #e5e7eb;
+            color: #6b7280;
+            padding: 1rem 0.75rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            text-align: right;
+            user-select: none;
+            border-right: 1px solid #d1d5db;
+            overflow: hidden;
+            min-width: 3rem;
+            white-space: pre;
+        }
+
+        .code-block {
+            flex: 1;
+            background-color: #f9fafb;
+            padding: 1rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.5;
+        }
+
+        .placeholder {
+            color: #6b7280;
+            font-style: italic;
+            padding: 1rem;
+        }
+
+        .error {
+            color: #dc2626;
+            font-weight: 600;
+            padding: 1rem;
+        }
+
+        .success {
+            color: #059669;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .sql-keyword {
+            color: #2563eb;
+            font-weight: 600;
+        }
+
+        .sql-function {
+            color: #7c3aed;
+            font-weight: 500;
+        }
+
+        .sql-string {
+            color: #059669;
+        }
+
+        .sql-number {
+            color: #ea580c;
+        }
+
+        .sql-operator {
+            color: #dc2626;
+        }
+
+        .sql-comment {
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        .sql-identifier {
+            color: #1f2937;
+        }
+
+        .stats {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background-color: #f3f4f6;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
+
+        .stats-item {
+            display: inline-block;
+            margin-right: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>SQL Formatter</h1>
+
+        <div class="controls">
+            <button class="btn" onclick="formatSQL()">Format SQL</button>
+            <button class="btn" onclick="minifySQL()">Minify</button>
+            <button class="btn-secondary btn" onclick="copyOutput()">Copy Output</button>
+            <button class="btn-secondary btn" onclick="clearAll()">Clear</button>
+            <div class="select-group">
+                <label for="dialectSelect">Dialect:</label>
+                <select id="dialectSelect">
+                    <option value="standard">Standard SQL</option>
+                    <option value="postgresql">PostgreSQL</option>
+                    <option value="oracle">Oracle</option>
+                    <option value="mssql">MS SQL Server</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid">
+            <!-- Left side - Input -->
+            <div class="panel">
+                <h2>Input</h2>
+                <div class="editor-container">
+                    <div id="inputLineNumbers" class="line-numbers">1</div>
+                    <textarea id="sqlInput" placeholder="Paste your SQL here..."></textarea>
+                </div>
+                <div id="copySuccess" class="success" style="display: none;">✓ Copied to clipboard!</div>
+            </div>
+
+            <!-- Right side - Formatted output -->
+            <div class="panel">
+                <h2>Output</h2>
+                <div class="output-container">
+                    <div id="outputLineNumbers" class="output-line-numbers">1</div>
+                    <div class="output">
+                        <div id="output" class="code-block">
+                            <div class="placeholder">Enter SQL to format</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="stats" class="stats" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSQL = null;
+
+        // SQL Keywords by dialect
+        const keywords = {
+            standard: [
+                'SELECT', 'FROM', 'WHERE', 'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'DROP', 'ALTER',
+                'TABLE', 'INDEX', 'VIEW', 'DATABASE', 'SCHEMA', 'JOIN', 'LEFT', 'RIGHT', 'INNER',
+                'OUTER', 'FULL', 'CROSS', 'ON', 'AS', 'AND', 'OR', 'NOT', 'IN', 'BETWEEN', 'LIKE',
+                'IS', 'NULL', 'ORDER', 'BY', 'GROUP', 'HAVING', 'LIMIT', 'OFFSET', 'UNION', 'ALL',
+                'DISTINCT', 'CASE', 'WHEN', 'THEN', 'ELSE', 'END', 'EXISTS', 'ANY', 'SOME',
+                'INTO', 'VALUES', 'SET', 'PRIMARY', 'KEY', 'FOREIGN', 'REFERENCES', 'UNIQUE',
+                'CHECK', 'DEFAULT', 'CASCADE', 'CONSTRAINT', 'ADD', 'COLUMN', 'WITH', 'RECURSIVE'
+            ],
+            postgresql: [
+                'SELECT', 'FROM', 'WHERE', 'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'DROP', 'ALTER',
+                'TABLE', 'INDEX', 'VIEW', 'DATABASE', 'SCHEMA', 'JOIN', 'LEFT', 'RIGHT', 'INNER',
+                'OUTER', 'FULL', 'CROSS', 'ON', 'AS', 'AND', 'OR', 'NOT', 'IN', 'BETWEEN', 'LIKE',
+                'IS', 'NULL', 'ORDER', 'BY', 'GROUP', 'HAVING', 'LIMIT', 'OFFSET', 'UNION', 'ALL',
+                'DISTINCT', 'CASE', 'WHEN', 'THEN', 'ELSE', 'END', 'EXISTS', 'ANY', 'SOME',
+                'INTO', 'VALUES', 'SET', 'PRIMARY', 'KEY', 'FOREIGN', 'REFERENCES', 'UNIQUE',
+                'CHECK', 'DEFAULT', 'CASCADE', 'CONSTRAINT', 'ADD', 'COLUMN', 'WITH', 'RECURSIVE',
+                'RETURNING', 'SERIAL', 'BIGSERIAL', 'SMALLSERIAL', 'ARRAY', 'JSONB', 'JSON',
+                'SERIAL', 'TEXT', 'TIMESTAMP', 'INTERVAL', 'BOOLEAN', 'ILIKE', 'SIMILAR'
+            ],
+            oracle: [
+                'SELECT', 'FROM', 'WHERE', 'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'DROP', 'ALTER',
+                'TABLE', 'INDEX', 'VIEW', 'DATABASE', 'JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER',
+                'FULL', 'CROSS', 'ON', 'AS', 'AND', 'OR', 'NOT', 'IN', 'BETWEEN', 'LIKE', 'IS',
+                'NULL', 'ORDER', 'BY', 'GROUP', 'HAVING', 'UNION', 'ALL', 'DISTINCT', 'CASE',
+                'WHEN', 'THEN', 'ELSE', 'END', 'EXISTS', 'ANY', 'INTO', 'VALUES', 'SET',
+                'PRIMARY', 'KEY', 'FOREIGN', 'REFERENCES', 'UNIQUE', 'CHECK', 'DEFAULT',
+                'CASCADE', 'CONSTRAINT', 'ADD', 'COLUMN', 'WITH', 'ROWNUM', 'CONNECT',
+                'START', 'PRIOR', 'NOCYCLE', 'LEVEL', 'SYS_CONTEXT', 'SYSDATE', 'DUAL',
+                'NUMBER', 'VARCHAR2', 'CLOB', 'BLOB', 'TIMESTAMP', 'SEQUENCE', 'TRIGGER',
+                'PROCEDURE', 'FUNCTION', 'PACKAGE', 'BEGIN', 'END', 'DECLARE', 'FETCH'
+            ],
+            mssql: [
+                'SELECT', 'FROM', 'WHERE', 'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'DROP', 'ALTER',
+                'TABLE', 'INDEX', 'VIEW', 'DATABASE', 'SCHEMA', 'JOIN', 'LEFT', 'RIGHT', 'INNER',
+                'OUTER', 'FULL', 'CROSS', 'ON', 'AS', 'AND', 'OR', 'NOT', 'IN', 'BETWEEN', 'LIKE',
+                'IS', 'NULL', 'ORDER', 'BY', 'GROUP', 'HAVING', 'UNION', 'ALL', 'DISTINCT',
+                'CASE', 'WHEN', 'THEN', 'ELSE', 'END', 'EXISTS', 'ANY', 'INTO', 'VALUES', 'SET',
+                'PRIMARY', 'KEY', 'FOREIGN', 'REFERENCES', 'UNIQUE', 'CHECK', 'DEFAULT',
+                'CASCADE', 'CONSTRAINT', 'ADD', 'COLUMN', 'WITH', 'TOP', 'PERCENT', 'OUTPUT',
+                'IDENTITY', 'NVARCHAR', 'VARCHAR', 'NCHAR', 'CHAR', 'DATETIME', 'DATETIME2',
+                'BIT', 'INT', 'BIGINT', 'SMALLINT', 'TINYINT', 'DECIMAL', 'NUMERIC', 'MONEY',
+                'EXEC', 'EXECUTE', 'PROCEDURE', 'FUNCTION', 'BEGIN', 'END', 'TRANSACTION',
+                'COMMIT', 'ROLLBACK', 'TRY', 'CATCH', 'THROW', 'RAISERROR', 'GOTO'
+            ]
+        };
+
+        // Common SQL functions
+        const functions = [
+            'COUNT', 'SUM', 'AVG', 'MIN', 'MAX', 'CAST', 'CONVERT', 'COALESCE', 'NULLIF',
+            'SUBSTRING', 'TRIM', 'UPPER', 'LOWER', 'LENGTH', 'CONCAT', 'REPLACE',
+            'ROUND', 'FLOOR', 'CEIL', 'ABS', 'NOW', 'CURRENT_TIMESTAMP', 'CURRENT_DATE',
+            'DATE_TRUNC', 'EXTRACT', 'DATE_PART', 'TO_CHAR', 'TO_DATE', 'TO_TIMESTAMP',
+            'ROW_NUMBER', 'RANK', 'DENSE_RANK', 'LAG', 'LEAD', 'FIRST_VALUE', 'LAST_VALUE',
+            'PARTITION', 'OVER', 'WINDOW', 'STRING_AGG', 'ARRAY_AGG', 'JSON_AGG'
+        ];
+
+        function updateInputLineNumbers() {
+            const textarea = document.getElementById('sqlInput');
+            const lineNumbers = document.getElementById('inputLineNumbers');
+            const lines = textarea.value.split('\n').length;
+
+            lineNumbers.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join('\n');
+        }
+
+        function updateOutputLineNumbers(text) {
+            const lineNumbers = document.getElementById('outputLineNumbers');
+            const lines = text.split('\n').length;
+
+            lineNumbers.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join('\n');
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        function tokenizeSQL(sql) {
+            const tokens = [];
+            let i = 0;
+
+            while (i < sql.length) {
+                const char = sql[i];
+
+                // Skip whitespace
+                if (/\s/.test(char)) {
+                    tokens.push({ type: 'whitespace', value: char });
+                    i++;
+                    continue;
+                }
+
+                // Comments
+                if (char === '-' && sql[i + 1] === '-') {
+                    let comment = '';
+                    while (i < sql.length && sql[i] !== '\n') {
+                        comment += sql[i];
+                        i++;
+                    }
+                    tokens.push({ type: 'comment', value: comment });
+                    continue;
+                }
+
+                if (char === '/' && sql[i + 1] === '*') {
+                    let comment = '';
+                    while (i < sql.length && !(sql[i] === '*' && sql[i + 1] === '/')) {
+                        comment += sql[i];
+                        i++;
+                    }
+                    comment += '*/';
+                    i += 2;
+                    tokens.push({ type: 'comment', value: comment });
+                    continue;
+                }
+
+                // Strings
+                if (char === "'" || char === '"') {
+                    const quote = char;
+                    let string = quote;
+                    i++;
+                    while (i < sql.length) {
+                        if (sql[i] === quote) {
+                            if (sql[i + 1] === quote) {
+                                string += quote + quote;
+                                i += 2;
+                            } else {
+                                string += quote;
+                                i++;
+                                break;
+                            }
+                        } else {
+                            string += sql[i];
+                            i++;
+                        }
+                    }
+                    tokens.push({ type: 'string', value: string });
+                    continue;
+                }
+
+                // Numbers
+                if (/[0-9]/.test(char)) {
+                    let number = '';
+                    while (i < sql.length && /[0-9.]/.test(sql[i])) {
+                        number += sql[i];
+                        i++;
+                    }
+                    tokens.push({ type: 'number', value: number });
+                    continue;
+                }
+
+                // Operators
+                if (/[=<>!+\-*/%,;().]/.test(char)) {
+                    let operator = char;
+                    if (i + 1 < sql.length && /[=<>!]/.test(sql[i + 1])) {
+                        operator += sql[i + 1];
+                        i++;
+                    }
+                    tokens.push({ type: 'operator', value: operator });
+                    i++;
+                    continue;
+                }
+
+                // Identifiers and keywords
+                if (/[a-zA-Z_]/.test(char)) {
+                    let word = '';
+                    while (i < sql.length && /[a-zA-Z0-9_]/.test(sql[i])) {
+                        word += sql[i];
+                        i++;
+                    }
+                    tokens.push({ type: 'word', value: word });
+                    continue;
+                }
+
+                // Unknown character
+                tokens.push({ type: 'unknown', value: char });
+                i++;
+            }
+
+            return tokens;
+        }
+
+        function formatSQLString(sql, colorize = true) {
+            const dialect = document.getElementById('dialectSelect').value;
+            const dialectKeywords = keywords[dialect];
+            const tokens = tokenizeSQL(sql);
+
+            let formatted = '';
+            let indent = 0;
+            let needsNewline = false;
+            let prevToken = null;
+
+            const majorKeywords = ['SELECT', 'FROM', 'WHERE', 'JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER',
+                'GROUP', 'ORDER', 'HAVING', 'UNION', 'LIMIT', 'OFFSET', 'INSERT',
+                'UPDATE', 'DELETE', 'SET', 'VALUES'];
+
+            for (let i = 0; i < tokens.length; i++) {
+                const token = tokens[i];
+                const nextToken = tokens[i + 1];
+
+                if (token.type === 'word') {
+                    const upperValue = token.value.toUpperCase();
+
+                    if (dialectKeywords.includes(upperValue)) {
+                        // Handle indentation for major keywords
+                        if (majorKeywords.includes(upperValue)) {
+                            if (upperValue === 'SELECT' || upperValue === 'INSERT' ||
+                                upperValue === 'UPDATE' || upperValue === 'DELETE') {
+                                if (prevToken && prevToken.type !== 'whitespace') {
+                                    formatted += '\n';
+                                }
+                                formatted += '  '.repeat(indent);
+                            } else if (upperValue === 'FROM' || upperValue === 'WHERE' ||
+                                upperValue === 'GROUP' || upperValue === 'ORDER' ||
+                                upperValue === 'HAVING' || upperValue === 'LIMIT' ||
+                                upperValue === 'UNION') {
+                                formatted += '\n' + '  '.repeat(indent);
+                            } else if (upperValue === 'JOIN' || upperValue === 'LEFT' ||
+                                upperValue === 'RIGHT' || upperValue === 'INNER' ||
+                                upperValue === 'OUTER') {
+                                formatted += '\n' + '  '.repeat(indent);
+                            } else if (upperValue === 'SET' || upperValue === 'VALUES') {
+                                formatted += '\n' + '  '.repeat(indent + 1);
+                            }
+                        }
+
+                        if (colorize) {
+                            formatted += `<span class="sql-keyword">${escapeHtml(upperValue)}</span>`;
+                        } else {
+                            formatted += upperValue;
+                        }
+                    } else if (functions.includes(upperValue)) {
+                        if (colorize) {
+                            formatted += `<span class="sql-function">${escapeHtml(upperValue)}</span>`;
+                        } else {
+                            formatted += upperValue;
+                        }
+                    } else {
+                        if (colorize) {
+                            formatted += `<span class="sql-identifier">${escapeHtml(token.value)}</span>`;
+                        } else {
+                            formatted += token.value;
+                        }
+                    }
+                } else if (token.type === 'string') {
+                    if (colorize) {
+                        formatted += `<span class="sql-string">${escapeHtml(token.value)}</span>`;
+                    } else {
+                        formatted += token.value;
+                    }
+                } else if (token.type === 'number') {
+                    if (colorize) {
+                        formatted += `<span class="sql-number">${escapeHtml(token.value)}</span>`;
+                    } else {
+                        formatted += token.value;
+                    }
+                } else if (token.type === 'operator') {
+                    if (colorize) {
+                        formatted += `<span class="sql-operator">${escapeHtml(token.value)}</span>`;
+                    } else {
+                        formatted += token.value;
+                    }
+                } else if (token.type === 'comment') {
+                    if (colorize) {
+                        formatted += `<span class="sql-comment">${escapeHtml(token.value)}</span>`;
+                    } else {
+                        formatted += token.value;
+                    }
+                } else if (token.type === 'whitespace') {
+                    if (token.value === '\n') {
+                        // Skip extra newlines
+                    } else {
+                        formatted += ' ';
+                    }
+                } else {
+                    formatted += escapeHtml(token.value);
+                }
+
+                prevToken = token;
+            }
+
+            return formatted.trim();
+        }
+
+        function minifySQLString(sql) {
+            const tokens = tokenizeSQL(sql);
+            let minified = '';
+            let prevToken = null;
+
+            for (const token of tokens) {
+                if (token.type === 'whitespace') {
+                    if (prevToken && prevToken.type !== 'whitespace' &&
+                        prevToken.type !== 'operator' && token.value !== '\n') {
+                        minified += ' ';
+                    }
+                } else if (token.type === 'comment') {
+                    // Skip comments in minified version
+                    continue;
+                } else if (token.type === 'word') {
+                    const dialect = document.getElementById('dialectSelect').value;
+                    const dialectKeywords = keywords[dialect];
+                    const upperValue = token.value.toUpperCase();
+
+                    if (dialectKeywords.includes(upperValue) || functions.includes(upperValue)) {
+                        minified += upperValue;
+                    } else {
+                        minified += token.value;
+                    }
+                } else {
+                    minified += token.value;
+                }
+                prevToken = token;
+            }
+
+            return minified.replace(/\s+/g, ' ').trim();
+        }
+
+        function countSQLStats(sql) {
+            const tokens = tokenizeSQL(sql);
+            const dialect = document.getElementById('dialectSelect').value;
+            const dialectKeywords = keywords[dialect];
+
+            let keywordCount = 0;
+            let tableCount = 0;
+
+            for (let i = 0; i < tokens.length; i++) {
+                const token = tokens[i];
+                if (token.type === 'word') {
+                    const upperValue = token.value.toUpperCase();
+                    if (dialectKeywords.includes(upperValue)) {
+                        keywordCount++;
+                    }
+                    if (upperValue === 'FROM' || upperValue === 'JOIN') {
+                        // Count next identifier as table
+                        let j = i + 1;
+                        while (j < tokens.length && tokens[j].type === 'whitespace') j++;
+                        if (j < tokens.length && tokens[j].type === 'word') {
+                            tableCount++;
+                        }
+                    }
+                }
+            }
+
+            return { keywords: keywordCount, tables: tableCount };
+        }
+
+        function formatSQL() {
+            const input = document.getElementById('sqlInput');
+            const inputValue = input.value.trim();
+            const output = document.getElementById('output');
+            const stats = document.getElementById('stats');
+
+            if (!inputValue) {
+                output.innerHTML = '<div class="placeholder">Enter SQL to format</div>';
+                stats.style.display = 'none';
+                updateOutputLineNumbers('');
+                return;
+            }
+
+            try {
+                const formattedPlain = formatSQLString(inputValue, false);
+                const formattedColored = formatSQLString(inputValue, true);
+
+                // Update input with formatted version
+                input.value = formattedPlain;
+                updateInputLineNumbers();
+
+                // Display colorized output
+                output.innerHTML = formattedColored;
+                updateOutputLineNumbers(formattedPlain);
+
+                currentSQL = formattedPlain;
+
+                const { keywords: keywordCount, tables: tableCount } = countSQLStats(inputValue);
+                const lines = formattedPlain.split('\n').length;
+                const chars = formattedPlain.length;
+
+                stats.innerHTML = `
+                    <span class="stats-item"><strong>Lines:</strong> ${lines}</span>
+                    <span class="stats-item"><strong>Characters:</strong> ${chars}</span>
+                    <span class="stats-item"><strong>Keywords:</strong> ${keywordCount}</span>
+                    <span class="stats-item"><strong>Tables:</strong> ${tableCount}</span>
+                `;
+                stats.style.display = 'block';
+            } catch (e) {
+                output.innerHTML = `<div class="error">Error formatting SQL: ${escapeHtml(e.message)}</div>`;
+                stats.style.display = 'none';
+                currentSQL = null;
+                updateOutputLineNumbers('');
+            }
+        }
+
+        function minifySQL() {
+            const input = document.getElementById('sqlInput');
+            const inputValue = input.value.trim();
+            const output = document.getElementById('output');
+            const stats = document.getElementById('stats');
+
+            if (!inputValue) {
+                output.innerHTML = '<div class="placeholder">Enter SQL to minify</div>';
+                stats.style.display = 'none';
+                updateOutputLineNumbers('');
+                return;
+            }
+
+            try {
+                const minified = minifySQLString(inputValue);
+
+                // Update input to minified version
+                input.value = minified;
+                updateInputLineNumbers();
+
+                // Show minified output
+                output.textContent = minified;
+                updateOutputLineNumbers(minified);
+
+                currentSQL = minified;
+
+                const chars = minified.length;
+                const originalChars = inputValue.length;
+                const saved = originalChars - chars;
+                const percent = originalChars > 0 ? ((saved / originalChars) * 100).toFixed(1) : 0;
+
+                stats.innerHTML = `
+                    <span class="stats-item"><strong>Characters:</strong> ${chars}</span>
+                    <span class="stats-item"><strong>Saved:</strong> ${saved} (${percent}%)</span>
+                `;
+                stats.style.display = 'block';
+            } catch (e) {
+                output.innerHTML = `<div class="error">Error minifying SQL: ${escapeHtml(e.message)}</div>`;
+                stats.style.display = 'none';
+                currentSQL = null;
+                updateOutputLineNumbers('');
+            }
+        }
+
+        function copyOutput() {
+            const copySuccess = document.getElementById('copySuccess');
+
+            if (!currentSQL) {
+                return;
+            }
+
+            navigator.clipboard.writeText(currentSQL).then(() => {
+                copySuccess.style.display = 'block';
+                setTimeout(() => {
+                    copySuccess.style.display = 'none';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+            });
+        }
+
+        function clearAll() {
+            document.getElementById('sqlInput').value = '';
+            document.getElementById('output').innerHTML = '<div class="placeholder">Enter SQL to format</div>';
+            document.getElementById('stats').style.display = 'none';
+            currentSQL = null;
+            updateInputLineNumbers();
+            updateOutputLineNumbers('');
+        }
+
+        // Update line numbers on input
+        document.getElementById('sqlInput').addEventListener('input', () => {
+            updateInputLineNumbers();
+        });
+
+        // Sync scroll for input
+        document.getElementById('sqlInput').addEventListener('scroll', function () {
+            document.getElementById('inputLineNumbers').scrollTop = this.scrollTop;
+        });
+
+        // Sync scroll for output
+        document.querySelector('.output').addEventListener('scroll', function () {
+            document.getElementById('outputLineNumbers').scrollTop = this.scrollTop;
+        });
+
+        // Handle paste events
+        document.getElementById('sqlInput').addEventListener('paste', () => {
+            setTimeout(updateInputLineNumbers, 10);
+        });
+
+        // Initialize line numbers
+        updateInputLineNumbers();
+    </script>
+</body>
+
+</html>

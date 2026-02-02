@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base64 Encoder/Decoder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f3f4f6;
+            min-height: 100vh;
+            padding: 2rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background-color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        .tab:hover {
+            color: #374151;
+        }
+
+        .tab.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .panel {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 1rem;
+        }
+
+        textarea {
+            width: 100%;
+            height: 384px;
+            padding: 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.875rem;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+
+        textarea::placeholder {
+            color: #9ca3af;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        button {
+            padding: 0.5rem 1rem;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #2563eb;
+        }
+
+        button:active {
+            background-color: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background-color: #6b7280;
+        }
+
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+
+        .info-box {
+            background-color: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: #1e40af;
+        }
+
+        .error-box {
+            background-color: #fef2f2;
+            border-left: 4px solid #dc2626;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: #991b1b;
+        }
+
+        .stats {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .stat-label {
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .content-hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Base64 Encoder/Decoder</h1>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('encode')">Encode</button>
+            <button class="tab" onclick="switchTab('decode')">Decode</button>
+        </div>
+
+        <!-- Encode Tab -->
+        <div id="encodeTab" class="grid">
+            <div class="panel">
+                <h2>Plain Text</h2>
+                <textarea id="plainTextInput" placeholder="Enter text to encode..."></textarea>
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Characters:</span>
+                        <span id="plainTextChars">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Bytes (UTF-8):</span>
+                        <span id="plainTextBytes">0</span>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button onclick="clearPlainText()">Clear</button>
+                    <button class="btn-secondary" onclick="copyPlainText()">Copy</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>Base64 Encoded</h2>
+                <textarea id="base64Output" placeholder="Base64 encoded output will appear here..." readonly></textarea>
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Characters:</span>
+                        <span id="base64Chars">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Size increase:</span>
+                        <span id="sizeIncrease">0%</span>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button onclick="clearBase64Output()">Clear</button>
+                    <button class="btn-secondary" onclick="copyBase64Output()">Copy</button>
+                </div>
+                <div id="encodeInfo" class="info-box" style="display: none;">
+                    Successfully encoded!
+                </div>
+            </div>
+        </div>
+
+        <!-- Decode Tab -->
+        <div id="decodeTab" class="grid content-hidden">
+            <div class="panel">
+                <h2>Base64 Encoded</h2>
+                <textarea id="base64Input" placeholder="Enter Base64 encoded text to decode..."></textarea>
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Characters:</span>
+                        <span id="base64InputChars">0</span>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button onclick="clearBase64Input()">Clear</button>
+                    <button class="btn-secondary" onclick="copyBase64Input()">Copy</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>Decoded Text</h2>
+                <textarea id="decodedOutput" placeholder="Decoded text will appear here..." readonly></textarea>
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Characters:</span>
+                        <span id="decodedChars">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Bytes (UTF-8):</span>
+                        <span id="decodedBytes">0</span>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button onclick="clearDecodedOutput()">Clear</button>
+                    <button class="btn-secondary" onclick="copyDecodedOutput()">Copy</button>
+                </div>
+                <div id="decodeInfo" class="info-box" style="display: none;">
+                    Successfully decoded!
+                </div>
+                <div id="decodeError" class="error-box" style="display: none;">
+                    Invalid Base64 input
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(t => t.classList.remove('active'));
+
+            if (tab === 'encode') {
+                tabs[0].classList.add('active');
+                document.getElementById('encodeTab').classList.remove('content-hidden');
+                document.getElementById('decodeTab').classList.add('content-hidden');
+            } else {
+                tabs[1].classList.add('active');
+                document.getElementById('encodeTab').classList.add('content-hidden');
+                document.getElementById('decodeTab').classList.remove('content-hidden');
+            }
+        }
+
+        function getByteLength(str) {
+            return new Blob([str]).size;
+        }
+
+        function encodeToBase64() {
+            const input = document.getElementById('plainTextInput').value;
+            const output = document.getElementById('base64Output');
+            const infoBox = document.getElementById('encodeInfo');
+
+            if (!input) {
+                output.value = '';
+                infoBox.style.display = 'none';
+                updateStats('encode');
+                return;
+            }
+
+            try {
+                const encoded = btoa(unescape(encodeURIComponent(input)));
+                output.value = encoded;
+                infoBox.style.display = 'block';
+                updateStats('encode');
+            } catch (e) {
+                output.value = 'Error encoding text';
+                infoBox.style.display = 'none';
+            }
+        }
+
+        function decodeFromBase64() {
+            const input = document.getElementById('base64Input').value.trim();
+            const output = document.getElementById('decodedOutput');
+            const infoBox = document.getElementById('decodeInfo');
+            const errorBox = document.getElementById('decodeError');
+
+            if (!input) {
+                output.value = '';
+                infoBox.style.display = 'none';
+                errorBox.style.display = 'none';
+                updateStats('decode');
+                return;
+            }
+
+            try {
+                const decoded = decodeURIComponent(escape(atob(input)));
+                output.value = decoded;
+                infoBox.style.display = 'block';
+                errorBox.style.display = 'none';
+                updateStats('decode');
+            } catch (e) {
+                output.value = '';
+                infoBox.style.display = 'none';
+                errorBox.style.display = 'block';
+                updateStats('decode');
+            }
+        }
+
+        function updateStats(mode) {
+            if (mode === 'encode') {
+                const plainText = document.getElementById('plainTextInput').value;
+                const base64Text = document.getElementById('base64Output').value;
+
+                document.getElementById('plainTextChars').textContent = plainText.length;
+                document.getElementById('plainTextBytes').textContent = getByteLength(plainText);
+                document.getElementById('base64Chars').textContent = base64Text.length;
+
+                if (plainText.length > 0 && base64Text.length > 0) {
+                    const increase = ((base64Text.length - plainText.length) / plainText.length * 100).toFixed(1);
+                    document.getElementById('sizeIncrease').textContent = increase + '%';
+                } else {
+                    document.getElementById('sizeIncrease').textContent = '0%';
+                }
+            } else {
+                const base64Text = document.getElementById('base64Input').value;
+                const decodedText = document.getElementById('decodedOutput').value;
+
+                document.getElementById('base64InputChars').textContent = base64Text.length;
+                document.getElementById('decodedChars').textContent = decodedText.length;
+                document.getElementById('decodedBytes').textContent = getByteLength(decodedText);
+            }
+        }
+
+        // Clear functions
+        function clearPlainText() {
+            document.getElementById('plainTextInput').value = '';
+            encodeToBase64();
+        }
+
+        function clearBase64Output() {
+            document.getElementById('base64Output').value = '';
+            document.getElementById('encodeInfo').style.display = 'none';
+            updateStats('encode');
+        }
+
+        function clearBase64Input() {
+            document.getElementById('base64Input').value = '';
+            decodeFromBase64();
+        }
+
+        function clearDecodedOutput() {
+            document.getElementById('decodedOutput').value = '';
+            document.getElementById('decodeInfo').style.display = 'none';
+            document.getElementById('decodeError').style.display = 'none';
+            updateStats('decode');
+        }
+
+        // Copy functions
+        function copyPlainText() {
+            const text = document.getElementById('plainTextInput').value;
+            navigator.clipboard.writeText(text).then(() => {
+                showCopyFeedback('Plain text copied!');
+            });
+        }
+
+        function copyBase64Output() {
+            const text = document.getElementById('base64Output').value;
+            navigator.clipboard.writeText(text).then(() => {
+                showCopyFeedback('Base64 copied!');
+            });
+        }
+
+        function copyBase64Input() {
+            const text = document.getElementById('base64Input').value;
+            navigator.clipboard.writeText(text).then(() => {
+                showCopyFeedback('Base64 copied!');
+            });
+        }
+
+        function copyDecodedOutput() {
+            const text = document.getElementById('decodedOutput').value;
+            navigator.clipboard.writeText(text).then(() => {
+                showCopyFeedback('Decoded text copied!');
+            });
+        }
+
+        function showCopyFeedback(message) {
+            const feedback = document.createElement('div');
+            feedback.style.position = 'fixed';
+            feedback.style.top = '2rem';
+            feedback.style.right = '2rem';
+            feedback.style.backgroundColor = '#10b981';
+            feedback.style.color = 'white';
+            feedback.style.padding = '0.75rem 1.5rem';
+            feedback.style.borderRadius = '0.5rem';
+            feedback.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+            feedback.style.zIndex = '1000';
+            feedback.textContent = message;
+            document.body.appendChild(feedback);
+
+            setTimeout(() => {
+                feedback.remove();
+            }, 2000);
+        }
+
+        // Event listeners
+        document.getElementById('plainTextInput').addEventListener('input', encodeToBase64);
+        document.getElementById('base64Input').addEventListener('input', decodeFromBase64);
+
+        // Initialize
+        updateStats('encode');
+        updateStats('decode');
+    </script>
+</body>
+
+</html>

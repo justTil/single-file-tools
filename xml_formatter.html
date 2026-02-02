@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XML Formatter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f3f4f6;
+            min-height: 100vh;
+            padding: 2rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 2rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #2563eb;
+        }
+
+        .btn:active {
+            background-color: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background-color: #6b7280;
+        }
+
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+
+        .btn-secondary:active {
+            background-color: #374151;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .panel {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 1rem;
+        }
+
+        .editor-container {
+            position: relative;
+            display: flex;
+            height: 384px;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .editor-container:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+
+        .line-numbers {
+            background-color: #f3f4f6;
+            color: #6b7280;
+            padding: 1rem 0.75rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            text-align: right;
+            user-select: none;
+            border-right: 1px solid #d1d5db;
+            overflow: hidden;
+            min-width: 3rem;
+            white-space: pre;
+        }
+
+        textarea {
+            flex: 1;
+            height: 100%;
+            padding: 1rem;
+            border: none;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.875rem;
+            resize: none;
+            outline: none;
+            line-height: 1.5;
+        }
+
+        textarea::placeholder {
+            color: #9ca3af;
+        }
+
+        .output {
+            height: 384px;
+            overflow-y: auto;
+        }
+
+        .output-container {
+            position: relative;
+            display: flex;
+            height: 384px;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            overflow: hidden;
+            background-color: #f9fafb;
+        }
+
+        .output-line-numbers {
+            background-color: #e5e7eb;
+            color: #6b7280;
+            padding: 1rem 0.75rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            text-align: right;
+            user-select: none;
+            border-right: 1px solid #d1d5db;
+            overflow: hidden;
+            min-width: 3rem;
+            white-space: pre;
+        }
+
+        .code-block {
+            flex: 1;
+            background-color: #f9fafb;
+            padding: 1rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.5;
+        }
+
+        .placeholder {
+            color: #6b7280;
+            font-style: italic;
+            padding: 1rem;
+        }
+
+        .error {
+            color: #dc2626;
+            font-weight: 600;
+            padding: 1rem;
+        }
+
+        .success {
+            color: #059669;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .xml-tag {
+            color: #059669;
+        }
+
+        .xml-attribute {
+            color: #7c3aed;
+        }
+
+        .xml-value {
+            color: #2563eb;
+        }
+
+        .xml-text {
+            color: #1f2937;
+        }
+
+        .xml-comment {
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        .xml-declaration {
+            color: #dc2626;
+        }
+
+        .stats {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background-color: #f3f4f6;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
+
+        .stats-item {
+            display: inline-block;
+            margin-right: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>XML Formatter</h1>
+
+        <div class="controls">
+            <button class="btn" onclick="formatXML()">Format XML</button>
+            <button class="btn" onclick="minifyXML()">Minify</button>
+            <button class="btn-secondary btn" onclick="copyOutput()">Copy Output</button>
+            <button class="btn-secondary btn" onclick="clearAll()">Clear</button>
+        </div>
+
+        <div class="grid">
+            <!-- Left side - Input -->
+            <div class="panel">
+                <h2>Input</h2>
+                <div class="editor-container">
+                    <div id="inputLineNumbers" class="line-numbers">1</div>
+                    <textarea id="xmlInput" placeholder="Paste your XML here..."></textarea>
+                </div>
+                <div id="copySuccess" class="success" style="display: none;">✓ Copied to clipboard!</div>
+            </div>
+
+            <!-- Right side - Formatted output -->
+            <div class="panel">
+                <h2>Output</h2>
+                <div class="output-container">
+                    <div id="outputLineNumbers" class="output-line-numbers">1</div>
+                    <div class="output">
+                        <div id="output" class="code-block">
+                            <div class="placeholder">Enter XML to format</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="stats" class="stats" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentXML = null;
+
+        function updateInputLineNumbers() {
+            const textarea = document.getElementById('xmlInput');
+            const lineNumbers = document.getElementById('inputLineNumbers');
+            const lines = textarea.value.split('\n').length;
+
+            lineNumbers.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join('\n');
+        }
+
+        function updateOutputLineNumbers(text) {
+            const lineNumbers = document.getElementById('outputLineNumbers');
+            const lines = text.split('\n').length;
+
+            lineNumbers.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join('\n');
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        function formatXMLString(xml, indent = 0, colorize = true) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xml, 'text/xml');
+
+            // Check for parsing errors
+            const parserError = xmlDoc.getElementsByTagName('parsererror');
+            if (parserError.length > 0) {
+                throw new Error(parserError[0].textContent);
+            }
+
+            let result = '';
+
+            function formatNode(node, level) {
+                const indentStr = '  '.repeat(level);
+
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    const tagName = node.nodeName;
+                    const hasChildren = node.childNodes.length > 0;
+                    const hasOnlyText = hasChildren && node.childNodes.length === 1 && node.childNodes[0].nodeType === Node.TEXT_NODE;
+
+                    // Opening tag
+                    if (colorize) {
+                        result += indentStr + '<span class="xml-tag">&lt;' + escapeHtml(tagName);
+                    } else {
+                        result += indentStr + '<' + tagName;
+                    }
+
+                    // Attributes
+                    if (node.attributes && node.attributes.length > 0) {
+                        for (let i = 0; i < node.attributes.length; i++) {
+                            const attr = node.attributes[i];
+                            if (colorize) {
+                                result += ' <span class="xml-attribute">' + escapeHtml(attr.name) + '</span>=<span class="xml-value">"' + escapeHtml(attr.value) + '"</span>';
+                            } else {
+                                result += ' ' + attr.name + '="' + attr.value + '"';
+                            }
+                        }
+                    }
+
+                    if (colorize) {
+                        result += '&gt;</span>';
+                    } else {
+                        result += '>';
+                    }
+
+                    // Content
+                    if (hasChildren) {
+                        if (hasOnlyText) {
+                            // Inline text content
+                            const textContent = node.childNodes[0].nodeValue.trim();
+                            if (colorize) {
+                                result += '<span class="xml-text">' + escapeHtml(textContent) + '</span>';
+                            } else {
+                                result += textContent;
+                            }
+                        } else {
+                            // Child elements
+                            result += '\n';
+                            for (let i = 0; i < node.childNodes.length; i++) {
+                                formatNode(node.childNodes[i], level + 1);
+                            }
+                            result += indentStr;
+                        }
+                    }
+
+                    // Closing tag
+                    if (colorize) {
+                        result += '<span class="xml-tag">&lt;/' + escapeHtml(tagName) + '&gt;</span>\n';
+                    } else {
+                        result += '</' + tagName + '>\n';
+                    }
+
+                } else if (node.nodeType === Node.TEXT_NODE) {
+                    const text = node.nodeValue.trim();
+                    if (text) {
+                        if (colorize) {
+                            result += indentStr + '<span class="xml-text">' + escapeHtml(text) + '</span>\n';
+                        } else {
+                            result += indentStr + text + '\n';
+                        }
+                    }
+                } else if (node.nodeType === Node.COMMENT_NODE) {
+                    if (colorize) {
+                        result += indentStr + '<span class="xml-comment">&lt;!--' + escapeHtml(node.nodeValue) + '--&gt;</span>\n';
+                    } else {
+                        result += indentStr + '<!--' + node.nodeValue + '-->\n';
+                    }
+                } else if (node.nodeType === Node.PROCESSING_INSTRUCTION_NODE) {
+                    if (colorize) {
+                        result += indentStr + '<span class="xml-declaration">&lt;?' + escapeHtml(node.target) + ' ' + escapeHtml(node.data) + '?&gt;</span>\n';
+                    } else {
+                        result += indentStr + '<?' + node.target + ' ' + node.data + '?>\n';
+                    }
+                }
+            }
+
+            // Handle XML declaration separately
+            const xmlDeclaration = xml.match(/<\?xml[^?]*\?>/);
+            if (xmlDeclaration) {
+                if (colorize) {
+                    result += '<span class="xml-declaration">' + escapeHtml(xmlDeclaration[0]) + '</span>\n';
+                } else {
+                    result += xmlDeclaration[0] + '\n';
+                }
+            }
+
+            // Format the root element
+            formatNode(xmlDoc.documentElement, 0);
+
+            return result.trim();
+        }
+
+        function minifyXMLString(xml) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xml, 'text/xml');
+
+            // Check for parsing errors
+            const parserError = xmlDoc.getElementsByTagName('parsererror');
+            if (parserError.length > 0) {
+                throw new Error(parserError[0].textContent);
+            }
+
+            let result = '';
+
+            function minifyNode(node) {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    result += '<' + node.nodeName;
+
+                    // Attributes
+                    if (node.attributes && node.attributes.length > 0) {
+                        for (let i = 0; i < node.attributes.length; i++) {
+                            const attr = node.attributes[i];
+                            result += ' ' + attr.name + '="' + attr.value + '"';
+                        }
+                    }
+
+                    result += '>';
+
+                    // Child nodes
+                    for (let i = 0; i < node.childNodes.length; i++) {
+                        minifyNode(node.childNodes[i]);
+                    }
+
+                    result += '</' + node.nodeName + '>';
+
+                } else if (node.nodeType === Node.TEXT_NODE) {
+                    const text = node.nodeValue.trim();
+                    if (text) {
+                        result += text;
+                    }
+                } else if (node.nodeType === Node.COMMENT_NODE) {
+                    result += '<!--' + node.nodeValue + '-->';
+                } else if (node.nodeType === Node.PROCESSING_INSTRUCTION_NODE) {
+                    result += '<?' + node.target + ' ' + node.data + '?>';
+                }
+            }
+
+            // Handle XML declaration
+            const xmlDeclaration = xml.match(/<\?xml[^?]*\?>/);
+            if (xmlDeclaration) {
+                result += xmlDeclaration[0];
+            }
+
+            minifyNode(xmlDoc.documentElement);
+
+            return result;
+        }
+
+        function countXMLStats(xmlString) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
+
+            let elements = 0;
+            let attributes = 0;
+
+            function count(node) {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    elements++;
+                    attributes += node.attributes ? node.attributes.length : 0;
+                    for (let i = 0; i < node.childNodes.length; i++) {
+                        count(node.childNodes[i]);
+                    }
+                }
+            }
+
+            count(xmlDoc.documentElement);
+            return { elements, attributes };
+        }
+
+        function formatXML() {
+            const input = document.getElementById('xmlInput');
+            const inputValue = input.value.trim();
+            const output = document.getElementById('output');
+            const stats = document.getElementById('stats');
+
+            if (!inputValue) {
+                output.innerHTML = '<div class="placeholder">Enter XML to format</div>';
+                stats.style.display = 'none';
+                updateOutputLineNumbers('');
+                return;
+            }
+
+            try {
+                const formattedPlain = formatXMLString(inputValue, 0, false);
+                const formattedColored = formatXMLString(inputValue, 0, true);
+
+                // Update input with formatted version
+                input.value = formattedPlain;
+                updateInputLineNumbers();
+
+                // Display colorized output
+                output.innerHTML = formattedColored;
+                updateOutputLineNumbers(formattedPlain);
+
+                currentXML = formattedPlain;
+
+                const { elements, attributes } = countXMLStats(inputValue);
+                const lines = formattedPlain.split('\n').length;
+                const chars = formattedPlain.length;
+
+                stats.innerHTML = `
+                    <span class="stats-item"><strong>Lines:</strong> ${lines}</span>
+                    <span class="stats-item"><strong>Characters:</strong> ${chars}</span>
+                    <span class="stats-item"><strong>Elements:</strong> ${elements}</span>
+                    <span class="stats-item"><strong>Attributes:</strong> ${attributes}</span>
+                `;
+                stats.style.display = 'block';
+            } catch (e) {
+                output.innerHTML = `<div class="error">Invalid XML: ${escapeHtml(e.message)}</div>`;
+                stats.style.display = 'none';
+                currentXML = null;
+                updateOutputLineNumbers('');
+            }
+        }
+
+        function minifyXML() {
+            const input = document.getElementById('xmlInput');
+            const inputValue = input.value.trim();
+            const output = document.getElementById('output');
+            const stats = document.getElementById('stats');
+
+            if (!inputValue) {
+                output.innerHTML = '<div class="placeholder">Enter XML to minify</div>';
+                stats.style.display = 'none';
+                updateOutputLineNumbers('');
+                return;
+            }
+
+            try {
+                const minified = minifyXMLString(inputValue);
+
+                // Update input to minified version
+                input.value = minified;
+                updateInputLineNumbers();
+
+                // Show minified output
+                output.textContent = minified;
+                updateOutputLineNumbers(minified);
+
+                currentXML = minified;
+
+                const chars = minified.length;
+                const originalChars = inputValue.length;
+                const saved = originalChars - chars;
+                const percent = ((saved / originalChars) * 100).toFixed(1);
+
+                stats.innerHTML = `
+                    <span class="stats-item"><strong>Characters:</strong> ${chars}</span>
+                    <span class="stats-item"><strong>Saved:</strong> ${saved} (${percent}%)</span>
+                `;
+                stats.style.display = 'block';
+            } catch (e) {
+                output.innerHTML = `<div class="error">Invalid XML: ${escapeHtml(e.message)}</div>`;
+                stats.style.display = 'none';
+                currentXML = null;
+                updateOutputLineNumbers('');
+            }
+        }
+
+        function copyOutput() {
+            const copySuccess = document.getElementById('copySuccess');
+
+            if (!currentXML) {
+                return;
+            }
+
+            navigator.clipboard.writeText(currentXML).then(() => {
+                copySuccess.style.display = 'block';
+                setTimeout(() => {
+                    copySuccess.style.display = 'none';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+            });
+        }
+
+        function clearAll() {
+            document.getElementById('xmlInput').value = '';
+            document.getElementById('output').innerHTML = '<div class="placeholder">Enter XML to format</div>';
+            document.getElementById('stats').style.display = 'none';
+            currentXML = null;
+            updateInputLineNumbers();
+            updateOutputLineNumbers('');
+        }
+
+        // Update line numbers on input
+        document.getElementById('xmlInput').addEventListener('input', () => {
+            updateInputLineNumbers();
+        });
+
+        // Sync scroll for input
+        document.getElementById('xmlInput').addEventListener('scroll', function () {
+            document.getElementById('inputLineNumbers').scrollTop = this.scrollTop;
+        });
+
+        // Sync scroll for output
+        document.querySelector('.output').addEventListener('scroll', function () {
+            document.getElementById('outputLineNumbers').scrollTop = this.scrollTop;
+        });
+
+        // Handle paste events
+        document.getElementById('xmlInput').addEventListener('paste', () => {
+            setTimeout(updateInputLineNumbers, 10);
+        });
+
+        // Initialize line numbers
+        updateInputLineNumbers();
+    </script>
+</body>
+
+</html>
